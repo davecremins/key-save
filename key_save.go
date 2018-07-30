@@ -19,7 +19,7 @@ func CreateRSAKey(keySize int) (*rsa.PrivateKey, error) {
 	return key, nil
 }
 
-/*func createFile(name string, key interface{}) {
+/*func CreateFile(name string, key interface{}) {
 	keyOut, err := os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		log.Print("failed to open %s for writing:", name, err)
@@ -27,19 +27,21 @@ func CreateRSAKey(keySize int) (*rsa.PrivateKey, error) {
 	}
 	defer keyOut.close()
 	k := key.(type)
-}
+}*/
 
-func pemBlockForKey(priv interface{}) *pem.Block {
-	switch k := priv.(type) {
+func pemBlockForKey(key interface{}) *pem.Block {
+	switch k := key.(type) {
+	case *rsa.PublicKey:
+		return &pem.Block{Type: "BEGIN RSA PUBLIC KEY", Bytes: x509.MarshalPKCS1PublicKey(k)}
 	case *rsa.PrivateKey:
-		return &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(k)}
+		return &pem.Block{Type: "BEGIN RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(k)}
 	default:
 		return nil
 	}
 }
 
 //verifier
-func verifySignatureWithPublicKey(message string, signature []byte, key *rsa.PublicKey) {
+/*func verifySignatureWithPublicKey(message string, signature []byte, key *rsa.PublicKey) {
 	newhash := crypto.SHA256
 	var opts rsa.PSSOptions
 	opts.SaltLength = rsa.PSSSaltLengthAuto // for simple example
