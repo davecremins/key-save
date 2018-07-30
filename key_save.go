@@ -1,6 +1,7 @@
 package keyMgt
 
 import (
+	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -32,13 +33,14 @@ func CreateFile(key interface{}) string {
 		os.Exit(1)
 	}
 
-	fileName := "rsa" + keyEncodingData.keyType + ".pem"
+	fileName := createFileName(keyEncodingData)
 	keyOut, err := os.Create(fileName)
 	if err != nil {
 		fmt.Println("failed to open %s for writing:", fileName, err)
 		os.Exit(1)
 	}
 	defer keyOut.Close()
+	fmt.Println("Key file created %s", fileName)
 	pem.Encode(keyOut, keyEncodingData.block)
 	return fileName
 }
@@ -58,6 +60,14 @@ func pemBlockForKey(key interface{}) (*keyEncoding, error) {
 	default:
 		return nil, fmt.Errorf("Unsupported key type %s", k)
 	}
+}
+
+func createFileName(keyEncodingData *keyEncoding) string {
+	var fileName bytes.Buffer
+	fileName.WriteString("rsa")
+	fileName.WriteString(keyEncodingData.keyType)
+	fileName.WriteString(".pem")
+	return fileName.String()
 }
 
 //verifier
