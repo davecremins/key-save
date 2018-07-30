@@ -24,20 +24,23 @@ func CreateRSAKey(keySize int) (*rsa.PrivateKey, *rsa.PublicKey, error) {
 	return privateKey, &privateKey.PublicKey, nil
 }
 
-func CreateFile(fileName string, key interface{}) {
+//Maybe support file location
+func CreateFile(key interface{}) string {
 	keyEncodingData, err := pemBlockForKey(key)
 	if err != nil {
 		fmt.Println(err.Error)
 		os.Exit(1)
 	}
 
-	keyOut, err := os.OpenFile(fileName+keyEncodingData.keyType, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	fileName := "rsa" + keyEncodingData.keyType + ".pem"
+	keyOut, err := os.Create(fileName)
 	if err != nil {
 		fmt.Println("failed to open %s for writing:", fileName, err)
 		os.Exit(1)
 	}
 	defer keyOut.Close()
 	pem.Encode(keyOut, keyEncodingData.block)
+	return fileName
 }
 
 func pemBlockForKey(key interface{}) (*keyEncoding, error) {
