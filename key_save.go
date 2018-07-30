@@ -4,14 +4,13 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"os"
-	"encoding/pem"
-	"log"
 )
 
-type keyEncoding struct{
-	block *pem.Block
+type keyEncoding struct {
+	block   *pem.Block
 	keyType string
 }
 
@@ -32,10 +31,10 @@ func CreateFile(fileName string, key interface{}) {
 		os.Exit(1)
 	}
 
-	keyOut, err := os.OpenFile(fileName + keyEncodingData.keyType, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	keyOut, err := os.OpenFile(fileName+keyEncodingData.keyType, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		log.Print("failed to open %s for writing:", fileName, err)
-		return
+		fmt.Println("failed to open %s for writing:", fileName, err)
+		os.Exit(1)
 	}
 	defer keyOut.Close()
 	pem.Encode(keyOut, keyEncodingData.block)
