@@ -1,42 +1,60 @@
 package keyMgt
 
 import (
-	//"crypto"
 	"crypto/rand"
 	"crypto/rsa"
-	//"crypto/sha256"
+	"crypto/x509"
 	"fmt"
 	"os"
+	"encoding/pem"
+	"log"
 )
 
-func CreateRSAKey(keySize int) (*rsa.PrivateKey, error) {
-	key, err := rsa.GenerateKey(rand.Reader, keySize)
+type keyEncoding struct{
+	block *pem.Block
+	keyType string
+}
+
+func CreateRSAKey(keySize int) (*rsa.PrivateKey, *rsa.PublicKey, error) {
+	privateKey, err := rsa.GenerateKey(rand.Reader, keySize)
 	if err != nil {
 		fmt.Println(err.Error)
 		os.Exit(1)
 	}
 
-	return key, nil
+	return privateKey, &privateKey.PublicKey, nil
 }
 
-/*func CreateFile(name string, key interface{}) {
-	keyOut, err := os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+func CreateFile(fileName string, key interface{}) {
+	keyEncodingData, err := pemBlockForKey(key)
 	if err != nil {
-		log.Print("failed to open %s for writing:", name, err)
+		fmt.Println(err.Error)
+		os.Exit(1)
+	}
+
+	keyOut, err := os.OpenFile(fileName + keyEncodingData.keyType, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	if err != nil {
+		log.Print("failed to open %s for writing:", fileName, err)
 		return
 	}
-	defer keyOut.close()
-	k := key.(type)
-}*/
+	defer keyOut.Close()
+	pem.Encode(keyOut, keyEncodingData.block)
+}
 
-func pemBlockForKey(key interface{}) *pem.Block {
+func pemBlockForKey(key interface{}) (*keyEncoding, error) {
 	switch k := key.(type) {
 	case *rsa.PublicKey:
-		return &pem.Block{Type: "BEGIN RSA PUBLIC KEY", Bytes: x509.MarshalPKCS1PublicKey(k)}
+		return &keyEncoding{
+			&pem.Block{Type: "BEGIN RSA PUBLIC KEY", Bytes: x509.MarshalPKCS1PublicKey(k)},
+			"_public",
+		}, nil
 	case *rsa.PrivateKey:
-		return &pem.Block{Type: "BEGIN RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(k)}
+		return &keyEncoding{
+			&pem.Block{Type: "BEGIN RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(k)},
+			"_private",
+		}, nil
 	default:
-		return nil
+		return nil, fmt.Errorf("Unsupported key type %s", k)
 	}
 }
 
