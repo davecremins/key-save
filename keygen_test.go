@@ -1,22 +1,21 @@
 package keyMgt
 
 import (
-	"testing"
-	//"fmt"
 	"reflect"
+	"testing"
 )
 
-func TestBadBitSize(t *testing.T) {
-	bitSizes := [5]int{-1, 0, -716}
+func TestErrorIsReturnedForBadBitSize(t *testing.T) {
+	bitSizes := []int{-716, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11}
 	for _, size := range bitSizes {
 		_, _, err := CreateRSAKeys(size)
-		if err == nil{
-			t.Errorf("error occured for rsa bit size %d: %s", size, err)
+		if err == nil {
+			t.Errorf("error should have been returned for rsa key bit size %d", size)
 		}
 	}
 }
 
-func TestConversionOfPrivateKey(t *testing.T){
+func TestConversionOfPrivateKey(t *testing.T) {
 	privateKey, _, _ := CreateRSAKeys(1024)
 	iType := ConvertPrivateKeyToInterface(privateKey)
 	typeIs := reflect.TypeOf(iType).String()
@@ -25,7 +24,7 @@ func TestConversionOfPrivateKey(t *testing.T){
 	}
 }
 
-func TestConversionOfPublicKey(t *testing.T){
+func TestConversionOfPublicKey(t *testing.T) {
 	_, publicKey, _ := CreateRSAKeys(1024)
 	iType := ConvertPublicKeyToInterface(publicKey)
 	typeIs := reflect.TypeOf(iType).String()
