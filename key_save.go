@@ -68,7 +68,7 @@ func pemBlockForKey(key interface{}) (*keyEncoding, error) {
 			"_private",
 		}, nil
 	default:
-		return nil, fmt.Errorf("Unsupported key type %s", reflect.TypeOf(k))
+		return nil, fmt.Errorf("Unsupported key type %s", reflect.TypeOf(k).String())
 	}
 }
 
