@@ -47,7 +47,7 @@ func CreateFile(key interface{}) string {
 	fileName := createFileName(keyEncodingData)
 	keyOut, err := os.Create(fileName)
 	if err != nil {
-		fmt.Println("failed to open %s for writing:", fileName, err)
+		fmt.Println(err)
 		os.Exit(1)
 	}
 	defer keyOut.Close()
