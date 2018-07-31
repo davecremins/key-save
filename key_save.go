@@ -19,9 +19,8 @@ type keyEncoding struct {
 func CreateRSAKeys(keySize int) (*rsa.PrivateKey, *rsa.PublicKey, error) {
 	privateKey, err := rsa.GenerateKey(rand.Reader, keySize)
 	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
-
 	return privateKey, &privateKey.PublicKey, nil
 }
 
@@ -47,7 +46,7 @@ func CreateFile(key interface{}) string {
 	fileName := createFileName(keyEncodingData)
 	keyOut, err := os.Create(fileName)
 	if err != nil {
-		fmt.Println("failed to open %s for writing:", fileName, err)
+		fmt.Println(err)
 		os.Exit(1)
 	}
 	defer keyOut.Close()
