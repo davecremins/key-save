@@ -63,7 +63,7 @@ func pemBlockForKey(key interface{}) (*keyEncoding, error) {
 			panic(err)
 		}
 		return &keyEncoding{
-			&pem.Block{Type: "RSA PUBLIC KEY", Bytes:pubkey_bytes},
+			&pem.Block{Type: "RSA PUBLIC KEY", Bytes: pubkey_bytes},
 			"_public",
 		}, nil
 	case *rsa.PrivateKey:
