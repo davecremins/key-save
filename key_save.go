@@ -58,13 +58,17 @@ func CreateFile(key interface{}) string {
 func pemBlockForKey(key interface{}) (*keyEncoding, error) {
 	switch k := key.(type) {
 	case *rsa.PublicKey:
+		pubkey_bytes, err := x509.MarshalPKIXPublicKey(k)
+		if err != nil {
+			panic(err)
+		}
 		return &keyEncoding{
-			&pem.Block{Type: "BEGIN RSA PUBLIC KEY", Bytes: x509.MarshalPKCS1PublicKey(k)},
+			&pem.Block{Type: "RSA PUBLIC KEY", Bytes: pubkey_bytes},
 			"_public",
 		}, nil
 	case *rsa.PrivateKey:
 		return &keyEncoding{
-			&pem.Block{Type: "BEGIN RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(k)},
+			&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(k)},
 			"_private",
 		}, nil
 	default:
