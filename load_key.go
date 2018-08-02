@@ -2,12 +2,12 @@ package keyMgt
 
 import (
 	"bufio"
-	"fmt"
-	"os"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"fmt"
+	"os"
 )
 
 func LoadPublicKeyFromPemFile(fileName string) (*rsa.PublicKey, error) {
