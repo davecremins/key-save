@@ -1,4 +1,4 @@
-package keyMgt
+package cipher
 
 import (
 	"bytes"
