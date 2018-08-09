@@ -1,4 +1,4 @@
-package key-mgt
+package keymgt
 
 import (
 	"bytes"
