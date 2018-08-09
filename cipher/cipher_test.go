@@ -3,10 +3,12 @@ package cipher
 import (
 	"bytes"
 	"testing"
+
+	km "github.com/davecremins/safe-deposit-box/key-mgt"
 )
 
 func TestEncryptionWithPublicKeyIsUnique(t *testing.T) {
-	_, publicKey, _ := CreateRSAKeys(2048)
+	_, publicKey, _ := km.CreateRSAKeys(2048)
 	message := []byte("Testing encryption function")
 	ciphertext1, _ := RSAEncrypt(&message, publicKey)
 	ciphertext2, _ := RSAEncrypt(&message, publicKey)
@@ -16,7 +18,7 @@ func TestEncryptionWithPublicKeyIsUnique(t *testing.T) {
 }
 
 func TestEncryptionDecryptionProcess(t *testing.T) {
-	privateKey, publicKey, _ := CreateRSAKeys(4096)
+	privateKey, publicKey, _ := km.CreateRSAKeys(4096)
 	message := []byte("Testing full encryption decryption process")
 	ciphertext, _ := RSAEncrypt(&message, publicKey)
 	plainText, _ := RSADecrypt(&ciphertext, privateKey)
