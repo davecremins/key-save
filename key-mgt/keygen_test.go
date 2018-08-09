@@ -1,4 +1,4 @@
-package cipher
+package key-mgt
 
 import (
 	"reflect"
