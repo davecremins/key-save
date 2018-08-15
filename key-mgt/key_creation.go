@@ -1,9 +1,10 @@
 package keymgt
 
 import (
-	"errors"
 	"crypto/rand"
 	"crypto/rsa"
+	"encoding/base64"
+	"errors"
 )
 
 var supportedAESKeySizes = map[int]bool{
@@ -41,5 +42,5 @@ func CreateAESKey(keySize int) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(key), nil
+	return base64.URLEncoding.EncodeToString(key), nil
 }

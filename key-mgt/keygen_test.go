@@ -26,6 +26,11 @@ func TestErrorIsReturnedForBadBitSizeInAESKeyCreation(t *testing.T) {
 
 }
 
+func TestCreateAESKey(t *testing.T) {
+	key, _ := CreateAESKey(128)
+	t.Log(key)
+}
+
 func TestConversionOfPrivateKey(t *testing.T) {
 	privateKey, _, _ := CreateRSAKeys(1024)
 	iType := ConvertPrivateKeyToInterface(privateKey)
