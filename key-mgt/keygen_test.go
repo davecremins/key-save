@@ -5,14 +5,30 @@ import (
 	"testing"
 )
 
-func TestErrorIsReturnedForBadBitSize(t *testing.T) {
-	bitSizes := []int{-716, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11}
-	for _, size := range bitSizes {
+func TestErrorIsReturnedForBadBitSizeInRSAKeyCreation(t *testing.T) {
+	keySizes := []int{-716, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11}
+	for _, size := range keySizes {
 		_, _, err := CreateRSAKeys(size)
 		if err == nil {
 			t.Errorf("error should have been returned for rsa key bit size %d", size)
 		}
 	}
+}
+
+func TestErrorIsReturnedForBadBitSizeInAESKeyCreation(t *testing.T) {
+	keySizes := []int{23, 127, -45, 199, 254, 312, 500}
+	for _, size := range keySizes {
+		_, err := CreateAESKey(size)
+		if err == nil {
+			t.Errorf("error should have been returned for aes key bit size %d", size)
+		}
+	}
+
+}
+
+func TestCreateAESKey(t *testing.T) {
+	key, _ := CreateAESKey(128)
+	t.Log(key)
 }
 
 func TestConversionOfPrivateKey(t *testing.T) {
