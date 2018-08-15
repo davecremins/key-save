@@ -2,5 +2,6 @@
 
 ## Functions
 - Create RSA public/private keys
-- Persist/retrieve keys in PEM format
-- Encrypt/decrypt data
+- Create random AES key
+- Persist/retrieve RSA keys in PEM format
+- Encrypt/decrypt data with RSA
