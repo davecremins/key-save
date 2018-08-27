@@ -5,6 +5,7 @@ import (
 	"crypto/rsa"
 	"encoding/base64"
 	"errors"
+	"io"
 )
 
 var supportedAESKeySizes = map[int]bool{
@@ -38,7 +39,7 @@ func CreateAESKey(keySize int) (string, error) {
 		return "", errors.New("AES key size only supports 128, 192 or 256 bits")
 	}
 	key := make([]byte, keySize/8)
-	_, err := rand.Read(key)
+	_, err := io.ReadFull(rand.Reader, key[:])
 	if err != nil {
 		return "", err
 	}
