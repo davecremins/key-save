@@ -30,15 +30,12 @@ func ChunkFile(filepath string, bufferSize int) {
 	fileParts := filesize / bufferSize
 	chunks := make([]chunk, fileParts)
 
-	// Offsets depend on the index
-	// Second go routine should start at bufferSize
 	for i := 0; i < fileParts; i++ {
 		chunks[i].size = bufferSize
 		chunks[i].offset = int64(bufferSize * i)
 	}
 
-	// check for any left over bytes. Add the residual number of bytes as the
-	// the last chunk size.
+	// Add the remainder number of bytes as last chunk size
 	if remainder := filesize % bufferSize; remainder != 0 {
 		c := chunk{size: remainder, offset: int64(fileParts * bufferSize)}
 		fileParts++
@@ -55,6 +52,7 @@ func ChunkFile(filepath string, bufferSize int) {
 	wg.Wait()
 }
 
+// TODO: Move this out into its own package and remove dependancy on WaitGroup
 func read(handle io.ReaderAt, part chunk, wg sync.WaitGroup) []byte {
 	defer wg.Done()
 
@@ -67,6 +65,6 @@ func read(handle io.ReaderAt, part chunk, wg sync.WaitGroup) []byte {
 			panic(err)
 		}
 	}
-
+	// Use a channel here to send buffer
 	return buffer
 }
