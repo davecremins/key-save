@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"sync"
 )
 
 type chunk struct {
@@ -26,20 +25,22 @@ func ChunkFile(filepath string, bufferSize int) {
 		return
 	}
 
-	chunks := calculateChunks(fileinfo.Size(), bufferSize)
-	chunkSize := len(*chunks)
+	chunks := prepareChunks(fileinfo.Size(), bufferSize)
+	chunkAmount := len(*chunks)
+	// TODO: Needs a test for the channel usage
+	chunkChannel := make(chan *[]byte, chunkAmount)
 
-	var wg sync.WaitGroup
-	wg.Add(chunkSize)
-
-	for i := 0; i < chunkSize; i++ {
-		go read(file, (*chunks)[i], wg)
+	for i := 0; i < chunkAmount; i++ {
+		go read(file, (*chunks)[i], chunkChannel)
 	}
 
-	wg.Wait()
+	for bytesRead := range chunkChannel {
+		fmt.Println("Bytes read:", string(*bytesRead))
+	}
+	close(chunkChannel)
 }
 
-func calculateChunks(blobSize int64, bufferSize int) *[]chunk {
+func prepareChunks(blobSize int64, bufferSize int) *[]chunk {
 	size := int(blobSize)
 	parts := size / bufferSize
 	chunks := make([]chunk, parts)
@@ -49,7 +50,7 @@ func calculateChunks(blobSize int64, bufferSize int) *[]chunk {
 		chunks[i].offset = int64(bufferSize * i)
 	}
 
-	// Add the remainder number of bytes as last chunk size
+	// Add the remaining  number of bytes as last chunk size
 	if remainder := size % bufferSize; remainder != 0 {
 		c := chunk{size: remainder, offset: int64(parts * bufferSize)}
 		chunks = append(chunks, c)
@@ -58,10 +59,8 @@ func calculateChunks(blobSize int64, bufferSize int) *[]chunk {
 	return &chunks
 }
 
-// TODO: Move this out into its own package and remove dependancy on WaitGroup
-func read(handle io.ReaderAt, part chunk, wg sync.WaitGroup) []byte {
-	defer wg.Done()
-
+// TODO: Move this out into its own package
+func read(handle io.ReaderAt, part chunk, chunkOut chan<- *[]byte) {
 	buffer := make([]byte, part.size)
 	_, err := handle.ReadAt(buffer, part.offset)
 
@@ -71,6 +70,5 @@ func read(handle io.ReaderAt, part chunk, wg sync.WaitGroup) []byte {
 			panic(err)
 		}
 	}
-	// Use a channel here to send buffer
-	return buffer
+	chunkOut <- &buffer
 }
