@@ -26,30 +26,36 @@ func ChunkFile(filepath string, bufferSize int) {
 		return
 	}
 
-	filesize := int(fileinfo.Size())
-	fileParts := filesize / bufferSize
-	chunks := make([]chunk, fileParts)
+	chunks := calculateChunks(fileinfo.Size(), bufferSize)
+	chunkSize := len(*chunks)
 
-	for i := 0; i < fileParts; i++ {
+	var wg sync.WaitGroup
+	wg.Add(chunkSize)
+
+	for i := 0; i < chunkSize; i++ {
+		go read(file, (*chunks)[i], wg)
+	}
+
+	wg.Wait()
+}
+
+func calculateChunks(blobSize int64, bufferSize int) *[]chunk {
+	size := int(blobSize)
+	parts := size / bufferSize
+	chunks := make([]chunk, parts)
+
+	for i := 0; i < parts; i++ {
 		chunks[i].size = bufferSize
 		chunks[i].offset = int64(bufferSize * i)
 	}
 
 	// Add the remainder number of bytes as last chunk size
-	if remainder := filesize % bufferSize; remainder != 0 {
-		c := chunk{size: remainder, offset: int64(fileParts * bufferSize)}
-		fileParts++
+	if remainder := size % bufferSize; remainder != 0 {
+		c := chunk{size: remainder, offset: int64(parts * bufferSize)}
 		chunks = append(chunks, c)
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(fileParts)
-
-	for i := 0; i < fileParts; i++ {
-		go read(file, chunks[i], wg)
-	}
-
-	wg.Wait()
+	return &chunks
 }
 
 // TODO: Move this out into its own package and remove dependancy on WaitGroup
