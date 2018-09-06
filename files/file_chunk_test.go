@@ -3,12 +3,11 @@ package files
 import (
 	"bytes"
 	"strings"
-	"sync"
 	"testing"
 )
 
 func TestChunkCalculation(t *testing.T) {
-	chunks := calculateChunks(10089, 128)
+	chunks := prepareChunks(10089, 128)
 	expectedChunkCount := func(size, bufferSize int) int {
 		divideResult := size / bufferSize
 		remainder := size % bufferSize
@@ -18,28 +17,29 @@ func TestChunkCalculation(t *testing.T) {
 		return divideResult
 	}(10089, 128)
 	if expectedChunkCount != len(*chunks) {
-		t.Error("calculateChunks failed to create the correct size array")
+		t.Error("prepareChunks failed to create the correct size array")
 	}
 }
 
 func TestChunkingOfReader(t *testing.T) {
-	var wg sync.WaitGroup
-	wg.Add(2)
 	reader := strings.NewReader("Testing my new reader for the files package")
 
 	part1 := chunk{size: 7, offset: int64(0)}
-	buffer := read(reader, part1, wg)
+	channel := make(chan *[]byte, 1)
+	read(reader, part1, channel)
+	buffer := <-channel
 
 	expected := []byte("Testing")
-	if !bytes.Equal(expected, buffer) {
+	if !bytes.Equal(expected, *buffer) {
 		t.Error("read failed to extract correct data for part 1")
 	}
 
 	part2 := chunk{size: 18, offset: int64(7)}
-	buffer = read(reader, part2, wg)
+	read(reader, part2, channel)
+	buffer = <-channel
 
 	expected = []byte(" my new reader for")
-	if !bytes.Equal(expected, buffer) {
+	if !bytes.Equal(expected, *buffer) {
 		t.Error("read failed to extract correct data for part 2")
 	}
 }
@@ -54,10 +54,8 @@ func TestPanicInChunking(t *testing.T) {
 		}
 	}()
 
-	var wg sync.WaitGroup
-	wg.Add(1)
 	reader := strings.NewReader("Hello World")
-
 	part := chunk{size: 12, offset: int64(0)}
-	read(reader, part, wg)
+	channel := make(chan *[]byte)
+	read(reader, part, channel)
 }
