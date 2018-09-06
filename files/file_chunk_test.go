@@ -7,6 +7,21 @@ import (
 	"testing"
 )
 
+func TestChunkCalculation(t *testing.T) {
+	chunks := calculateChunks(10089, 128)
+	expectedChunkCount := func(size, bufferSize int) int {
+		divideResult := size / bufferSize
+		remainder := size % bufferSize
+		if remainder > 0 {
+			divideResult++
+		}
+		return divideResult
+	}(10089, 128)
+	if expectedChunkCount != len(*chunks) {
+		t.Error("calculateChunks failed to create the correct size array")
+	}
+}
+
 func TestChunkingOfReader(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(2)
@@ -17,7 +32,7 @@ func TestChunkingOfReader(t *testing.T) {
 
 	expected := []byte("Testing")
 	if !bytes.Equal(expected, buffer) {
-		t.Error("Read failed to extract correct data for part 1")
+		t.Error("read failed to extract correct data for part 1")
 	}
 
 	part2 := chunk{size: 18, offset: int64(7)}
@@ -25,7 +40,7 @@ func TestChunkingOfReader(t *testing.T) {
 
 	expected = []byte(" my new reader for")
 	if !bytes.Equal(expected, buffer) {
-		t.Error("Read failed to extract correct data for part 2")
+		t.Error("read failed to extract correct data for part 2")
 	}
 }
 

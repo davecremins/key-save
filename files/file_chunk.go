@@ -49,7 +49,7 @@ func calculateChunks(blobSize int64, bufferSize int) *[]chunk {
 		chunks[i].offset = int64(bufferSize * i)
 	}
 
-	// Add the remainder number of bytes as last chunk size
+	// Add the remaining  number of bytes as last chunk size
 	if remainder := size % bufferSize; remainder != 0 {
 		c := chunk{size: remainder, offset: int64(parts * bufferSize)}
 		chunks = append(chunks, c)
