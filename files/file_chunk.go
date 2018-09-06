@@ -27,6 +27,7 @@ func ChunkFile(filepath string, bufferSize int) {
 
 	chunks := prepareChunks(fileinfo.Size(), bufferSize)
 	chunkAmount := len(*chunks)
+	// TODO: Needs a test for the channel usage
 	chunkChannel := make(chan *[]byte, chunkAmount)
 
 	for i := 0; i < chunkAmount; i++ {
