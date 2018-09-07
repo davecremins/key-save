@@ -38,9 +38,11 @@ func ChunkFile(filepath string, bufferSize int) {
 	go allocateJobs(file, chunks, chunkAmount, jobs)
 
 	jobResult := make(chan *[]byte, chunkAmount)
-	go processResults(jobResult)
+	totalByteReadCount := make(chan int)
+	go processResults(jobResult, totalByteReadCount)
 
 	createWorkers(jobs, jobResult, chunkAmount)
+	fmt.Println("--- Total amount of bytes read:", <-totalByteReadCount, " ---")
 }
 
 func allocateJobs(file io.ReaderAt, chunks *[]chunk, chunkAmount int, jobs chan<- job) {
@@ -50,13 +52,13 @@ func allocateJobs(file io.ReaderAt, chunks *[]chunk, chunkAmount int, jobs chan<
 	close(jobs)
 }
 
-func processResults(jobResults <-chan *[]byte) {
+func processResults(jobResults <-chan *[]byte, done chan<- int) {
 	totalByteCount := 0
 	for bRead := range jobResults {
 		totalByteCount += len(*bRead)
 		fmt.Println("Bytes read:", string(*bRead))
 	}
-	fmt.Println("Total amount of bytes read:", totalByteCount)
+	done <- totalByteCount
 }
 
 func createWorkers(jobs chan job, jobResults chan *[]byte, chunkAmount int) {
