@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sync"
 )
 
 type chunk struct {
@@ -34,34 +35,48 @@ func ChunkFile(filepath string, bufferSize int) {
 	chunkAmount := len(*chunks)
 
 	jobs := make(chan job, chunkAmount)
-	jobResult := make(chan *[]byte, chunkAmount)
-	for w := 0; w < chunkAmount; w++ {
-		go readWorker(w+1, jobs, jobResult)
-	}
+	go allocateJobs(file, chunks, chunkAmount, jobs)
 
+	jobResult := make(chan *[]byte, chunkAmount)
+	go processResults(jobResult)
+
+	createWorkers(jobs, jobResult, chunkAmount)
+}
+
+func allocateJobs(file io.ReaderAt, chunks *[]chunk, chunkAmount int, jobs chan<- job) {
 	for i := 0; i < chunkAmount; i++ {
 		jobs <- job{handle: file, data: &(*chunks)[i]}
 	}
-
 	close(jobs)
+}
 
+func processResults(jobResults <-chan *[]byte) {
 	totalByteCount := 0
-	for bRead := range jobResult {
+	for bRead := range jobResults {
 		totalByteCount += len(*bRead)
 		fmt.Println("Bytes read:", string(*bRead))
 	}
-
 	fmt.Println("Total amount of bytes read:", totalByteCount)
 }
 
-func readWorker(id int, jobs <-chan job, bytesRead chan<- *[]byte) {
+func createWorkers(jobs chan job, jobResults chan *[]byte, chunkAmount int) {
+	var wg sync.WaitGroup
+	for w := 0; w < chunkAmount; w++ {
+		wg.Add(1)
+		go readWorker(w+1, jobs, jobResults, &wg)
+	}
+	wg.Wait()
+	close(jobResults)
+}
+
+func readWorker(id int, jobs <-chan job, bytesRead chan<- *[]byte, wg *sync.WaitGroup) {
 	for j := range jobs {
 		fmt.Println("Processing job in worker:", id)
 		buffer := read(j.handle, *j.data)
 		bytesRead <- &buffer
 		fmt.Println("Finished processing job in worker:", id)
 	}
-	close(bytesRead)
+	wg.Done()
 }
 
 func prepareChunks(blobSize int64, bufferSize int) *[]chunk {
