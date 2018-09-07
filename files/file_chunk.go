@@ -11,6 +11,11 @@ type chunk struct {
 	offset int64
 }
 
+type readJob struct {
+	handle io.ReaderAt
+	data   *chunk
+}
+
 func ChunkFile(filepath string, bufferSize int) {
 	file, err := os.Open(filepath)
 	if err != nil {
@@ -27,17 +32,29 @@ func ChunkFile(filepath string, bufferSize int) {
 
 	chunks := prepareChunks(fileinfo.Size(), bufferSize)
 	chunkAmount := len(*chunks)
-	// TODO: Needs a test for the channel usage
-	chunkChannel := make(chan *[]byte, chunkAmount)
+
+	jobs := make(chan readJob)
+	jobResult := make(chan *[]byte)
+	for w := 0; w < chunkAmount; w++ {
+		go readWorker(w+1, jobs, jobResult)
+	}
 
 	for i := 0; i < chunkAmount; i++ {
-		go read(file, (*chunks)[i], chunkChannel)
+		jobs <- readJob{handle: file, data: &(*chunks)[i]}
 	}
+	close(jobs)
 
-	for bytesRead := range chunkChannel {
-		fmt.Println("Bytes read:", string(*bytesRead))
+	for bRead := range jobResult {
+		fmt.Println("Bytes read:", string(*bRead))
 	}
-	close(chunkChannel)
+}
+
+func readWorker(id int, jobs <-chan readJob, bytesRead chan<- *[]byte) {
+	for j := range jobs {
+		fmt.Println("Processing job in worker:", id)
+		buffer := read(j.handle, *j.data)
+		bytesRead <- &buffer
+	}
 }
 
 func prepareChunks(blobSize int64, bufferSize int) *[]chunk {
@@ -60,7 +77,7 @@ func prepareChunks(blobSize int64, bufferSize int) *[]chunk {
 }
 
 // TODO: Move this out into its own package
-func read(handle io.ReaderAt, part chunk, chunkOut chan<- *[]byte) {
+func read(handle io.ReaderAt, part chunk) []byte {
 	buffer := make([]byte, part.size)
 	_, err := handle.ReadAt(buffer, part.offset)
 
@@ -70,5 +87,5 @@ func read(handle io.ReaderAt, part chunk, chunkOut chan<- *[]byte) {
 			panic(err)
 		}
 	}
-	chunkOut <- &buffer
+	return buffer
 }
