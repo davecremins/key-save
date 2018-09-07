@@ -33,8 +33,8 @@ func ChunkFile(filepath string, bufferSize int) {
 	chunks := prepareChunks(fileinfo.Size(), bufferSize)
 	chunkAmount := len(*chunks)
 
-	jobs := make(chan readJob)
-	jobResult := make(chan *[]byte)
+	jobs := make(chan readJob, chunkAmount)
+	jobResult := make(chan *[]byte, chunkAmount)
 	for w := 0; w < chunkAmount; w++ {
 		go readWorker(w+1, jobs, jobResult)
 	}
@@ -42,11 +42,16 @@ func ChunkFile(filepath string, bufferSize int) {
 	for i := 0; i < chunkAmount; i++ {
 		jobs <- readJob{handle: file, data: &(*chunks)[i]}
 	}
+
 	close(jobs)
 
+	totalByteCount := 0
 	for bRead := range jobResult {
+		totalByteCount += len(*bRead)
 		fmt.Println("Bytes read:", string(*bRead))
 	}
+
+	fmt.Println("Total amount of bytes read:", totalByteCount)
 }
 
 func readWorker(id int, jobs <-chan readJob, bytesRead chan<- *[]byte) {
@@ -54,7 +59,9 @@ func readWorker(id int, jobs <-chan readJob, bytesRead chan<- *[]byte) {
 		fmt.Println("Processing job in worker:", id)
 		buffer := read(j.handle, *j.data)
 		bytesRead <- &buffer
+		fmt.Println("Finished processing job in worker:", id)
 	}
+	close(bytesRead)
 }
 
 func prepareChunks(blobSize int64, bufferSize int) *[]chunk {
@@ -67,7 +74,7 @@ func prepareChunks(blobSize int64, bufferSize int) *[]chunk {
 		chunks[i].offset = int64(bufferSize * i)
 	}
 
-	// Add the remaining  number of bytes as last chunk size
+	// Add the remaining number of bytes as last chunk size
 	if remainder := size % bufferSize; remainder != 0 {
 		c := chunk{size: remainder, offset: int64(parts * bufferSize)}
 		chunks = append(chunks, c)
