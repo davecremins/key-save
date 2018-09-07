@@ -11,7 +11,7 @@ type chunk struct {
 	offset int64
 }
 
-type readJob struct {
+type job struct {
 	handle io.ReaderAt
 	data   *chunk
 }
@@ -33,14 +33,14 @@ func ChunkFile(filepath string, bufferSize int) {
 	chunks := prepareChunks(fileinfo.Size(), bufferSize)
 	chunkAmount := len(*chunks)
 
-	jobs := make(chan readJob, chunkAmount)
+	jobs := make(chan job, chunkAmount)
 	jobResult := make(chan *[]byte, chunkAmount)
 	for w := 0; w < chunkAmount; w++ {
 		go readWorker(w+1, jobs, jobResult)
 	}
 
 	for i := 0; i < chunkAmount; i++ {
-		jobs <- readJob{handle: file, data: &(*chunks)[i]}
+		jobs <- job{handle: file, data: &(*chunks)[i]}
 	}
 
 	close(jobs)
@@ -54,7 +54,7 @@ func ChunkFile(filepath string, bufferSize int) {
 	fmt.Println("Total amount of bytes read:", totalByteCount)
 }
 
-func readWorker(id int, jobs <-chan readJob, bytesRead chan<- *[]byte) {
+func readWorker(id int, jobs <-chan job, bytesRead chan<- *[]byte) {
 	for j := range jobs {
 		fmt.Println("Processing job in worker:", id)
 		buffer := read(j.handle, *j.data)
