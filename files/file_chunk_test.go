@@ -25,21 +25,18 @@ func TestChunkingOfReader(t *testing.T) {
 	reader := strings.NewReader("Testing my new reader for the files package")
 
 	part1 := chunk{size: 7, offset: int64(0)}
-	channel := make(chan *[]byte, 1)
-	read(reader, part1, channel)
-	buffer := <-channel
+	buffer := read(reader, part1)
 
 	expected := []byte("Testing")
-	if !bytes.Equal(expected, *buffer) {
+	if !bytes.Equal(expected, buffer) {
 		t.Error("read failed to extract correct data for part 1")
 	}
 
 	part2 := chunk{size: 18, offset: int64(7)}
-	read(reader, part2, channel)
-	buffer = <-channel
+	buffer = read(reader, part2)
 
 	expected = []byte(" my new reader for")
-	if !bytes.Equal(expected, *buffer) {
+	if !bytes.Equal(expected, buffer) {
 		t.Error("read failed to extract correct data for part 2")
 	}
 }
@@ -56,6 +53,5 @@ func TestPanicInChunking(t *testing.T) {
 
 	reader := strings.NewReader("Hello World")
 	part := chunk{size: 12, offset: int64(0)}
-	channel := make(chan *[]byte)
-	read(reader, part, channel)
+	read(reader, part)
 }
