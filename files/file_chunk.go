@@ -17,7 +17,7 @@ type job struct {
 	data   *chunk
 }
 
-func ChunkFile(filepath string, bufferSize int) {
+func ReadFileInChunks(filepath string, bufferSize int) {
 	file, err := os.Open(filepath)
 	if err != nil {
 		fmt.Println(err)
