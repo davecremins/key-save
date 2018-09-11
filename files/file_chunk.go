@@ -6,12 +6,12 @@ import (
 	"os"
 	"sync"
 
-	. "github.com/davecremins/safe-deposit-box/io-ops"
+	ops "github.com/davecremins/safe-deposit-box/io-ops"
 )
 
 type job struct {
 	handle io.ReaderAt
-	data   *Chunk
+	data   *ops.Chunk
 }
 
 func ReadFileInChunks(filepath string, bufferSize int) {
@@ -28,7 +28,7 @@ func ReadFileInChunks(filepath string, bufferSize int) {
 		return
 	}
 
-	chunks := PrepareChunks(fileinfo.Size(), bufferSize)
+	chunks := ops.PrepareChunks(fileinfo.Size(), bufferSize)
 	chunkAmount := len(*chunks)
 
 	jobs := make(chan job, chunkAmount)
@@ -42,7 +42,7 @@ func ReadFileInChunks(filepath string, bufferSize int) {
 	fmt.Println("--- Total amount of bytes read:", <-totalByteReadCount, " ---")
 }
 
-func allocateJobs(file io.ReaderAt, chunks *[]Chunk, chunkAmount int, jobs chan<- job) {
+func allocateJobs(file io.ReaderAt, chunks *[]ops.Chunk, chunkAmount int, jobs chan<- job) {
 	for i := 0; i < chunkAmount; i++ {
 		jobs <- job{handle: file, data: &(*chunks)[i]}
 	}
@@ -71,7 +71,7 @@ func createWorkers(jobs chan job, jobResults chan *[]byte, chunkAmount int) {
 func readWorker(id int, jobs <-chan job, bytesRead chan<- *[]byte, wg *sync.WaitGroup) {
 	for j := range jobs {
 		fmt.Println("Processing job in worker:", id)
-		buffer := Read(j.handle, *j.data)
+		buffer := ops.Read(j.handle, *j.data)
 		bytesRead <- buffer
 		fmt.Println("Finished processing job in worker:", id)
 	}
