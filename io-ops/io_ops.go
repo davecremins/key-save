@@ -29,7 +29,7 @@ func PrepareChunks(blobSize int64, bufferSize int) *[]Chunk {
 	return &chunks
 }
 
-func Read(handle io.ReaderAt, part Chunk) []byte {
+func Read(handle io.ReaderAt, part Chunk) *[]byte {
 	buffer := make([]byte, part.Size)
 	_, err := handle.ReadAt(buffer, part.Offset)
 
@@ -39,5 +39,5 @@ func Read(handle io.ReaderAt, part Chunk) []byte {
 			panic(err)
 		}
 	}
-	return buffer
+	return &buffer
 }

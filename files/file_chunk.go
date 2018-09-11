@@ -72,7 +72,7 @@ func readWorker(id int, jobs <-chan job, bytesRead chan<- *[]byte, wg *sync.Wait
 	for j := range jobs {
 		fmt.Println("Processing job in worker:", id)
 		buffer := Read(j.handle, *j.data)
-		bytesRead <- &buffer
+		bytesRead <- buffer
 		fmt.Println("Finished processing job in worker:", id)
 	}
 	wg.Done()
