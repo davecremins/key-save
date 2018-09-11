@@ -28,7 +28,7 @@ func TestChunkingOfReader(t *testing.T) {
 	buffer := Read(reader, part1)
 
 	expected := []byte("Testing")
-	if !bytes.Equal(expected, buffer) {
+	if !bytes.Equal(expected, *buffer) {
 		t.Error("read failed to extract correct data for part 1")
 	}
 
@@ -36,7 +36,7 @@ func TestChunkingOfReader(t *testing.T) {
 	buffer = Read(reader, part2)
 
 	expected = []byte(" my new reader for")
-	if !bytes.Equal(expected, buffer) {
+	if !bytes.Equal(expected, *buffer) {
 		t.Error("read failed to extract correct data for part 2")
 	}
 }
