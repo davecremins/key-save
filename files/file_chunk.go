@@ -14,6 +14,14 @@ type job struct {
 	data   *ops.Chunk
 }
 
+var showInfo = true
+
+func info(args ...interface{}) {
+	if showInfo {
+		fmt.Println(args...)
+	}
+}
+
 func ReadFileInChunks(filepath string, bufferSize int) {
 	file, err := os.Open(filepath)
 	if err != nil {
@@ -39,7 +47,8 @@ func ReadFileInChunks(filepath string, bufferSize int) {
 	go processResults(jobResult, totalByteReadCount)
 
 	createWorkers(jobs, jobResult, chunkAmount)
-	fmt.Println("--- Total amount of bytes read:", <-totalByteReadCount, " ---")
+	totalRead := <-totalByteReadCount
+	info("--- Total amount of bytes read:", totalRead, " ---")
 }
 
 func allocateJobs(file io.ReaderAt, chunks *[]ops.Chunk, chunkAmount int, jobs chan<- job) {
@@ -53,12 +62,13 @@ func processResults(jobResults <-chan *[]byte, done chan<- int) {
 	totalByteCount := 0
 	for bRead := range jobResults {
 		totalByteCount += len(*bRead)
-		fmt.Println("Bytes read:", string(*bRead))
+		info("Bytes read:", string(*bRead))
 	}
 	done <- totalByteCount
 }
 
 func createWorkers(jobs chan job, jobResults chan *[]byte, chunkAmount int) {
+	info(fmt.Sprintf("Creating %d workers to read file", chunkAmount))
 	var wg sync.WaitGroup
 	for w := 0; w < chunkAmount; w++ {
 		wg.Add(1)
@@ -70,10 +80,10 @@ func createWorkers(jobs chan job, jobResults chan *[]byte, chunkAmount int) {
 
 func readWorker(id int, jobs <-chan job, bytesRead chan<- *[]byte, wg *sync.WaitGroup) {
 	for j := range jobs {
-		fmt.Println("Processing job in worker:", id)
+		info("Processing job in worker:", id)
 		buffer := ops.Read(j.handle, *j.data)
 		bytesRead <- buffer
-		fmt.Println("Finished processing job in worker:", id)
+		info("Finished processing job in worker:", id)
 	}
 	wg.Done()
 }
