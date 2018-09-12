@@ -9,9 +9,9 @@ import (
 )
 
 var supportedAESKeySizes = map[int]bool{
-	128: true,
-	192: true,
-	256: true,
+	16: true,
+	24: true,
+	32: true,
 }
 
 func CreateRSAKeys(keySize int) (*rsa.PrivateKey, *rsa.PublicKey, error) {
@@ -34,11 +34,11 @@ func ConvertPrivateKeyToInterface(privateKey *rsa.PrivateKey) interface{} {
 	return iType
 }
 
-func CreateAESKey(keySize int) (string, error) {
+func CreateRandomKey(keySize int) (string, error) {
 	if !supportedAESKeySizes[keySize] {
-		return "", errors.New("AES key size only supports 128, 192 or 256 bits")
+		return "", errors.New("Random key size support for 16, 24 or 32 bytes only")
 	}
-	key := make([]byte, keySize/8)
+	key := make([]byte, keySize)
 	_, err := io.ReadFull(rand.Reader, key[:])
 	if err != nil {
 		return "", err
