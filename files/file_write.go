@@ -1,6 +1,7 @@
 package files
 
 import (
+	"io"
 	"os"
 )
 
@@ -12,12 +13,15 @@ func CreateAndWaitToWrite(filename string, bytesToWrite chan *[]byte, includeSep
 		panic(err)
 	}
 	defer handle.Close()
+	write(handle, bytesToWrite, includeSeparator)
+	handle.Sync()
+}
 
+func write(handle io.Writer, bytesToWrite chan *[]byte, includeSeparator bool) {
 	for content := range bytesToWrite {
 		handle.Write(*content)
 		if includeSeparator {
-			handle.WriteString(separator)
+			handle.Write([]byte(separator))
 		}
 	}
-	handle.Sync()
 }
