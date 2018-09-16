@@ -17,6 +17,7 @@ func CreateAndWaitToWrite(filename string, bytesToWrite chan *[]byte, includeSep
 	handle.Sync()
 }
 
+// TODO: Write test
 func write(handle io.Writer, bytesToWrite chan *[]byte, includeSeparator bool) {
 	for content := range bytesToWrite {
 		handle.Write(*content)
