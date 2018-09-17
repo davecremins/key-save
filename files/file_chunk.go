@@ -22,6 +22,24 @@ func info(args ...interface{}) {
 	}
 }
 
+func OpenFile(filepath string) (*os.File, error) {
+	file, err := os.Open(filepath)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return file, err
+}
+
+func Size(file *os.File) (int64, error) {
+	fileinfo, err := file.Stat()
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return fileinfo.Size(), nil
+}
+
 func ReadFileInChunks(filepath string, bufferSize int) {
 	file, err := os.Open(filepath)
 	if err != nil {
@@ -40,7 +58,7 @@ func ReadFileInChunks(filepath string, bufferSize int) {
 	chunkAmount := len(*chunks)
 
 	jobs := make(chan job, chunkAmount)
-	go allocateJobs(file, chunks, chunkAmount, jobs)
+	go allocateJobs(file, chunks, jobs)
 
 	jobResult := make(chan *[]byte, chunkAmount)
 	totalByteReadCount := make(chan int)
@@ -51,8 +69,16 @@ func ReadFileInChunks(filepath string, bufferSize int) {
 	info("--- Total amount of bytes read:", totalRead, " ---")
 }
 
-func allocateJobs(file io.ReaderAt, chunks *[]ops.Chunk, chunkAmount int, jobs chan<- job) {
-	for i := 0; i < chunkAmount; i++ {
+func ReadFileInChunks(file io.ReaderAt, chunks *[]ops.Chunk, bytesRead chan<- *[]byte) {
+	chunkAmount := len(*chunks)
+	jobs := make(chan job, chunkAmount)
+	go allocateJobs(file, chunks, jobs)
+	createWorkers(jobs, bytesRead, chunkAmount)
+}
+
+func allocateJobs(file io.ReaderAt, chunks *[]ops.Chunk, jobs chan<- job) {
+	length := len(*chunks)
+	for i := 0; i < length; i++ {
 		jobs <- job{handle: file, data: &(*chunks)[i]}
 	}
 	close(jobs)

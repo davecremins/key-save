@@ -6,6 +6,7 @@ import (
 )
 
 type Chunk struct {
+	Sequence int
 	Size   int
 	Offset int64
 }
@@ -16,13 +17,14 @@ func PrepareChunks(blobSize int64, bufferSize int) *[]Chunk {
 	chunks := make([]Chunk, parts)
 
 	for i := 0; i < parts; i++ {
+		chunks[i].Sequence = i
 		chunks[i].Size = bufferSize
 		chunks[i].Offset = int64(bufferSize * i)
 	}
 
 	// Add the remaining number of bytes as last Chunk Size
 	if remainder := Size % bufferSize; remainder != 0 {
-		c := Chunk{Size: remainder, Offset: int64(parts * bufferSize)}
+		c := Chunk{Sequence: parts, Size: remainder, Offset: int64(parts * bufferSize)}
 		chunks = append(chunks, c)
 	}
 
