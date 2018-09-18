@@ -17,6 +17,6 @@ func TestWritingToFileViaChannel(t *testing.T) {
 	}(byteChan)
 	write(&buf, byteChan, false)
 	if "Hello World" != buf.String() {
-		t.Error("write via channel returned unexpected result:", buf.String())
+		t.Error("buffer string contents does not match expected:", buf.String())
 	}
 }
