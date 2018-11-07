@@ -7,7 +7,7 @@ import (
 	km "github.com/davecremins/safe-deposit-box/key-mgt"
 )
 
-func TestEncryptionWithPublicKeyIsUnique(t *testing.T) {
+func TestRSAEncryptionWithPublicKeyIsUnique(t *testing.T) {
 	_, publicKey, _ := km.CreateRSAKeys(2048)
 	message := []byte("Testing encryption function")
 	ciphertext1, _ := RSAEncrypt(&message, publicKey)
@@ -17,12 +17,22 @@ func TestEncryptionWithPublicKeyIsUnique(t *testing.T) {
 	}
 }
 
-func TestEncryptionDecryptionProcess(t *testing.T) {
+func TestRSAEncryptionDecryptionProcess(t *testing.T) {
 	privateKey, publicKey, _ := km.CreateRSAKeys(4096)
-	message := []byte("Testing full encryption decryption process")
+	message := []byte("Testing full RSA encryption decryption process")
 	ciphertext, _ := RSAEncrypt(&message, publicKey)
-	plainText, _ := RSADecrypt(&ciphertext, privateKey)
-	if !bytes.Equal(message, plainText) {
-		t.Error("rsa encryption/decryption process failed, plaintext doesn't match original message")
+	plaintext, _ := RSADecrypt(&ciphertext, privateKey)
+	if !bytes.Equal(message, plaintext) {
+		t.Error("RSA encryption/decryption process failed, plaintext doesn't match original message")
+	}
+}
+
+func TestAESEncryptionDecryptionProcess(t *testing.T) {
+	aesKey, _ := km.CreateRandomKeyBytes(32)
+	message := []byte("Testing full AES encryption decryption process")
+	ciphertext, _ := AESGCMEncrypt(&message, &aesKey)
+	plaintext, _ := AESGCMDecrypt(&ciphertext, &aesKey)
+	if !bytes.Equal(message, plaintext) {
+		t.Error("AES encryption/decryption process failed, plaintext doesn't match original message")
 	}
 }
