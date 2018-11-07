@@ -18,7 +18,7 @@ func TestErrorIsReturnedForBadBitSizeInRSAKeyCreation(t *testing.T) {
 func TestErrorIsReturnedForBadByteSizeInRandomKeyCreation(t *testing.T) {
 	keySizes := []int{0, 1, 15, 21, 29, 33, 45, 64, 82, 128, 256, 512, 1024}
 	for _, size := range keySizes {
-		_, err := CreateRandomKey(size)
+		_, err := CreateRandomKeyBytes(size)
 		if err == nil {
 			t.Errorf("error should have been returned for key byte size %d", size)
 		}
@@ -27,8 +27,14 @@ func TestErrorIsReturnedForBadByteSizeInRandomKeyCreation(t *testing.T) {
 }
 
 func TestCreateRandomKey(t *testing.T) {
-	key, _ := CreateRandomKey(32)
+	key, _ := CreateRandomKeyBytes(32)
 	t.Log(key)
+}
+
+func TestConvertRandomByteKeyToBase64Str(t *testing.T) {
+	key, _ := CreateRandomKeyBytes(32)
+	base64Str := ConvertToBase64Str(key)
+	t.Log(base64Str)
 }
 
 func TestConversionOfPrivateKey(t *testing.T) {

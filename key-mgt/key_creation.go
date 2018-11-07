@@ -34,14 +34,18 @@ func ConvertPrivateKeyToInterface(privateKey *rsa.PrivateKey) interface{} {
 	return iType
 }
 
-func CreateRandomKey(keySize int) (string, error) {
+func CreateRandomKeyBytes(keySize int) ([]byte, error) {
 	if !supportedKeySizes[keySize] {
-		return "", errors.New("Random key size support for 16, 24 or 32 bytes only")
+		return nil, errors.New("Random key size support for 16, 24 or 32 bytes only")
 	}
 	key := make([]byte, keySize)
 	_, err := io.ReadFull(rand.Reader, key[:])
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return base64.URLEncoding.EncodeToString(key), nil
+	return key, nil
+}
+
+func ConvertToBase64Str(key []byte) string {
+	return base64.StdEncoding.EncodeToString(key)
 }
