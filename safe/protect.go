@@ -1,8 +1,8 @@
 package safe
 
 /*import (
-	cipher "github.com/davecremins/safe-deposit-box/cipher"
-	fr "github.com/davecremins/safe-deposit-box/files"
+	cipher "gitlab.com/davecremins/safe-deposit-box/cipher"
+	fr "gitlab.com/davecremins/safe-deposit-box/files"
 )
 
 // TODO

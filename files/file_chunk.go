@@ -6,7 +6,7 @@ import (
 	"os"
 	"sync"
 
-	ops "github.com/davecremins/safe-deposit-box/io-ops"
+	ops "gitlab.com/davecremins/safe-deposit-box/io-ops"
 )
 
 type job struct {

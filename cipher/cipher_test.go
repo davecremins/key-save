@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	km "github.com/davecremins/safe-deposit-box/key-mgt"
+	km "gitlab.com/davecremins/safe-deposit-box/key-mgt"
 )
 
 func TestRSAEncryptionWithPublicKeyIsUnique(t *testing.T) {
