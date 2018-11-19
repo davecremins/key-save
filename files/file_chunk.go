@@ -81,8 +81,8 @@ func createWorkers(jobs chan job, jobResults chan *[]byte, chunkAmount int) {
 func readWorker(id int, jobs <-chan job, bytesRead chan<- *[]byte, wg *sync.WaitGroup) {
 	for j := range jobs {
 		info("Processing job in worker:", id)
-		buffer := ops.Read(j.handle, *j.data)
-		bytesRead <- buffer
+		ops.ReadIntoChunk(j.handle, j.data)
+		bytesRead <- j.data.Data
 		info("Finished processing job in worker:", id)
 	}
 	wg.Done()

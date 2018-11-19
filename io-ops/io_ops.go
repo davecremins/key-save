@@ -8,11 +8,12 @@ import (
 type Chunk struct {
 	Size   int
 	Offset int64
+	Data   *[]byte
 }
 
 func PrepareChunks(blobSize int64, bufferSize int) *[]Chunk {
-	Size := int(blobSize)
-	parts := Size / bufferSize
+	size := int(blobSize)
+	parts := size / bufferSize
 	chunks := make([]Chunk, parts)
 
 	for i := 0; i < parts; i++ {
@@ -21,7 +22,7 @@ func PrepareChunks(blobSize int64, bufferSize int) *[]Chunk {
 	}
 
 	// Add the remaining number of bytes as last Chunk Size
-	if remainder := Size % bufferSize; remainder != 0 {
+	if remainder := size % bufferSize; remainder != 0 {
 		c := Chunk{Size: remainder, Offset: int64(parts * bufferSize)}
 		chunks = append(chunks, c)
 	}
@@ -29,7 +30,7 @@ func PrepareChunks(blobSize int64, bufferSize int) *[]Chunk {
 	return &chunks
 }
 
-func Read(handle io.ReaderAt, part Chunk) *[]byte {
+func ReadIntoChunk(handle io.ReaderAt, part *Chunk) {
 	buffer := make([]byte, part.Size)
 	_, err := handle.ReadAt(buffer, part.Offset)
 
@@ -39,5 +40,5 @@ func Read(handle io.ReaderAt, part Chunk) *[]byte {
 			panic(err)
 		}
 	}
-	return &buffer
+	part.Data = &buffer
 }
