@@ -2,6 +2,7 @@ package files
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 )
 
@@ -19,4 +20,9 @@ func TestWritingToFileViaChannel(t *testing.T) {
 	if "Hello World" != buf.String() {
 		t.Error("buffer string contents does not match expected:", buf.String())
 	}
+}
+
+func TestReadingOfContentInChunks(t *testing.T) {
+	reader := strings.NewReader("Testing my new reader for the files package")
+	readInChunks(reader, reader.Size(), 16)
 }
