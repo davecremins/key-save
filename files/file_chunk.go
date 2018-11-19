@@ -22,20 +22,20 @@ func info(args ...interface{}) {
 	}
 }
 
-func ReadFileInChunks(filepath string, bufferSize int) {
+func ReadFileInChunks(filepath string, bufferSize int) *[]ops.Chunk {
 	file, err := os.Open(filepath)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return nil
 	}
 	defer file.Close()
 
 	fileinfo, err := file.Stat()
 	if err != nil {
 		fmt.Println(err)
-		return
+		return nil
 	}
-	readInChunks(file, fileinfo.Size(), bufferSize)
+	return readInChunks(file, fileinfo.Size(), bufferSize)
 }
 
 func readInChunks(file io.ReaderAt, dataSize int64, bufferSize int) *[]ops.Chunk {
