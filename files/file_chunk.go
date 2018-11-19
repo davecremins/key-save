@@ -35,8 +35,11 @@ func ReadFileInChunks(filepath string, bufferSize int) {
 		fmt.Println(err)
 		return
 	}
+	readInChunks(file, fileinfo.Size(), bufferSize)
+}
 
-	chunks := ops.PrepareChunks(fileinfo.Size(), bufferSize)
+func readInChunks(file io.ReaderAt, dataSize int64, bufferSize int) {
+	chunks := ops.PrepareChunks(dataSize, bufferSize)
 	chunkAmount := len(*chunks)
 
 	jobs := make(chan job, chunkAmount)
@@ -49,8 +52,8 @@ func ReadFileInChunks(filepath string, bufferSize int) {
 	createWorkers(jobs, jobResult, chunkAmount)
 	totalRead := <-totalByteReadCount
 	info("--- Total amount of bytes read:", totalRead, " ---")
-}
 
+}
 func allocateJobs(file io.ReaderAt, chunks *[]ops.Chunk, chunkAmount int, jobs chan<- job) {
 	for i := 0; i < chunkAmount; i++ {
 		jobs <- job{handle: file, data: &(*chunks)[i]}
