@@ -22,33 +22,30 @@ func info(args ...interface{}) {
 	}
 }
 
-func ReadFileInChunks(filepath string, bufferSize int) {
+func ReadFileInChunks(filepath string, bufferSize int) *[]ops.Chunk {
 	file, err := os.Open(filepath)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return nil
 	}
 	defer file.Close()
 
 	fileinfo, err := file.Stat()
 	if err != nil {
 		fmt.Println(err)
-		return
+		return nil
 	}
+	return readInChunks(file, fileinfo.Size(), bufferSize)
+}
 
-	chunks := ops.PrepareChunks(fileinfo.Size(), bufferSize)
+func readInChunks(file io.ReaderAt, dataSize int64, bufferSize int) *[]ops.Chunk {
+	chunks := ops.PrepareChunks(dataSize, bufferSize)
 	chunkAmount := len(*chunks)
-
 	jobs := make(chan job, chunkAmount)
 	go allocateJobs(file, chunks, chunkAmount, jobs)
 
-	jobResult := make(chan *[]byte, chunkAmount)
-	totalByteReadCount := make(chan int)
-	go processResults(jobResult, totalByteReadCount)
-
-	createWorkers(jobs, jobResult, chunkAmount)
-	totalRead := <-totalByteReadCount
-	info("--- Total amount of bytes read:", totalRead, " ---")
+	createWorkers(jobs, chunkAmount)
+	return chunks
 }
 
 func allocateJobs(file io.ReaderAt, chunks *[]ops.Chunk, chunkAmount int, jobs chan<- job) {
@@ -67,22 +64,20 @@ func processResults(jobResults <-chan *[]byte, done chan<- int) {
 	done <- totalByteCount
 }
 
-func createWorkers(jobs chan job, jobResults chan *[]byte, chunkAmount int) {
+func createWorkers(jobs chan job, chunkAmount int) {
 	info(fmt.Sprintf("Creating %d workers to read file", chunkAmount))
 	var wg sync.WaitGroup
 	for w := 0; w < chunkAmount; w++ {
 		wg.Add(1)
-		go readWorker(w+1, jobs, jobResults, &wg)
+		go readWorker(w+1, jobs, &wg)
 	}
 	wg.Wait()
-	close(jobResults)
 }
 
-func readWorker(id int, jobs <-chan job, bytesRead chan<- *[]byte, wg *sync.WaitGroup) {
+func readWorker(id int, jobs <-chan job, wg *sync.WaitGroup) {
 	for j := range jobs {
 		info("Processing job in worker:", id)
-		buffer := ops.Read(j.handle, *j.data)
-		bytesRead <- buffer
+		ops.ReadIntoChunk(j.handle, j.data)
 		info("Finished processing job in worker:", id)
 	}
 	wg.Done()
