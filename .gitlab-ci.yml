@@ -1,0 +1,18 @@
+image: golang:1.10-stretch
+
+stages:
+  - build
+
+before_script:
+  - apt-get update && apt-get install -y make curl
+  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+  - mkdir -p /go/src/gitlab.com/davecremins
+  - ln -s /builds/davecremins/safe-deposit-box /go/src/gitlab.com/davecremins
+  - cd /go/src/gitlab.com/davecremins/safe-deposit-box
+
+build:
+  stage: build
+  script:
+    - make all
+    - make test
+
