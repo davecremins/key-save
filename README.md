@@ -1,4 +1,4 @@
-# Safe-Deposit-Box [![Build Status](https://travis-ci.org/davecremins/safe-deposit-box.svg?branch=master)](https://travis-ci.org/davecremins/safe-deposit-box) 
+# Safe-Deposit-Box [![pipeline status](https://gitlab.com/davecremins/safe-deposit-box/badges/master/pipeline.svg)](https://gitlab.com/davecremins/safe-deposit-box/commits/master)[![coverage report](https://gitlab.com/davecremins/safe-deposit-box/badges/master/coverage.svg)](https://gitlab.com/davecremins/safe-deposit-box/commits/master)
 
 ## Functions
 - Create RSA public/private keys
