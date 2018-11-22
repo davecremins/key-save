@@ -42,8 +42,10 @@ func createWorker(id int, jobPipe <-chan Job, wg *sync.WaitGroup) {
 }
 
 func SendWorkToPipe(jobPipe chan<- Job, jobs *[]Job){
-	for _, work := range (*jobs) {
-		jobPipe <- work
-	}
-	close(jobPipe)
+	go func () {
+		for _, work := range (*jobs) {
+			jobPipe <- work
+		}
+		close(jobPipe)
+	}()
 }
