@@ -5,7 +5,6 @@ import (
 	"sync"
 )
 
-
 var showInfo = true
 
 func info(args ...interface{}) {
@@ -32,15 +31,6 @@ func CreateWorkersForJobPipe(jobPipe chan Job, workerCount int) {
 	wg.Wait()
 }
 
-func createWorker(id int, jobPipe <-chan Job, wg *sync.WaitGroup) {
-	for work := range jobPipe {
-		info("Processing job in worker:", id)
-		work.Execute()
-		info("Finished processing job in worker:", id)
-	}
-	wg.Done()
-}
-
 func SendWorkToPipe(jobPipe chan<- Job, jobs *[]Job){
 	go func () {
 		for _, work := range (*jobs) {
@@ -48,4 +38,13 @@ func SendWorkToPipe(jobPipe chan<- Job, jobs *[]Job){
 		}
 		close(jobPipe)
 	}()
+}
+
+func createWorker(id int, jobPipe <-chan Job, wg *sync.WaitGroup) {
+	for work := range jobPipe {
+		info("Processing job in worker:", id)
+		work.Execute()
+		info("Finished processing job in worker:", id)
+	}
+	wg.Done()
 }
