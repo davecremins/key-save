@@ -5,6 +5,21 @@ import (
 	"testing"
 )
 
+func TestCreationOfRSAKeys(t *testing.T) {
+	privateKey, publicKey, err := CreateRSAKeys(1024)
+	if privateKey == nil {
+		t.Error("failed to create privateKey")
+	}
+
+	if publicKey == nil {
+		t.Error("failed to create publicKey")
+	}
+
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func TestErrorIsReturnedForBadBitSizeInRSAKeyCreation(t *testing.T) {
 	keySizes := []int{-716, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11}
 	for _, size := range keySizes {
