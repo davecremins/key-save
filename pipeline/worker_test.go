@@ -2,13 +2,13 @@ package pipeline
 
 import "testing"
 
-type mock struct {}
+type mock struct{}
 
 func (m *mock) Execute() error {
 	return nil
 }
 
-func TestCanCreatePipelineConfig(t *testing.T){
+func TestCanCreatePipelineConfig(t *testing.T) {
 	config := new(Config)
 	if config == nil {
 		t.Error("failed to create instance of pipeline config type")
