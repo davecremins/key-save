@@ -39,9 +39,13 @@ func ReadFileInChunks(filepath string, bufferSize int) *[]ops.Chunk {
 func readInChunks(file io.ReaderAt, dataSize int64, bufferSize int) *[]ops.Chunk {
 	chunks := ops.PrepareChunks(dataSize, bufferSize)
 	chunkAmount := len(*chunks)
-	jobCh := pipeline.CreateJobPipe(chunkAmount)
-	pipeline.SendWorkToPipe(jobCh, allocateFileOps(file, chunks))
-	pipeline.CreateWorkersForJobPipe(jobCh, 10)
+	pipelineConfig := pipeline.Config{
+		JobSize: chunkAmount,
+		WorkerAmount: 10,
+		Jobs: allocateFileOps(file, chunks),
+		LoadBalance: false,
+	}
+	pipeline.Create(pipelineConfig)
 	return chunks
 }
 
