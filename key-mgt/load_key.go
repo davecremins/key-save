@@ -7,6 +7,7 @@ import (
 	"errors"
 	"encoding/pem"
 	"io"
+	"fmt"
 )
 
 func LoadPublicKeyFromPemData(reader io.Reader) (*rsa.PublicKey, error) {
@@ -43,6 +44,7 @@ func loadDataFromSource(reader io.Reader) []byte {
 }
 
 func decodeBytesToPemBlock(pemBytes *[]byte) (*pem.Block, error) {
+	fmt.Println(string(*pemBytes)) // TODO: Remove this
 	block, _ := pem.Decode(*pemBytes)
 	if block == nil {
 		return nil, errors.New("FATAL: could not decode pem bytes to block")

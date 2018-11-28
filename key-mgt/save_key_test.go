@@ -4,7 +4,7 @@ import "testing"
 
 func TestCreatePemBlockForPrivateKey(t *testing.T){
 	privateKey, _, _ := CreateRSAKeys(1024)
-	encodingStruct, err := pemBlockForKey(privateKey)
+	encodingStruct, err := createPemEncodingStructureForKey(privateKey)
 	if err != nil {
 		t.Error(err)
 	}
@@ -18,7 +18,7 @@ func TestCreatePemBlockForPrivateKey(t *testing.T){
 
 func TestCreatePemBlockForPublicKey(t *testing.T){
 	_, publicKey, _ := CreateRSAKeys(1024)
-	encodingStruct, err := pemBlockForKey(publicKey)
+	encodingStruct, err := createPemEncodingStructureForKey(publicKey)
 	if err != nil {
 		t.Error(err)
 	}
@@ -30,18 +30,17 @@ func TestCreatePemBlockForPublicKey(t *testing.T){
 	t.Log(*encodingStruct.block)
 }
 
-func TestErrorIsReturnedForUnsupportedType(t *testing.T){
-	_, err := pemBlockForKey("key")
+func TestPemEncodingErrorIsReturnedForUnsupportedType(t *testing.T){
+	_, err := createPemEncodingStructureForKey("key")
 	if err == nil {
-		t.Error("pemBlockForKey should have failed with unsuported type")
+		t.Error("should have failed with unsuported type")
 	}
 	t.Log(err)
 }
 
-// Does this belong here?
-func TestCreateFileNameConvention(t *testing.T){
-	fileName := createFileName(&keyEncoding{keyType: "_public"})
-	if fileName != "rsa_public.pem" {
-		t.Error("Incorrect file name convention")
+func TestCreateNameConvention(t *testing.T){
+	name := createPemName(&pemEncoding{keyType: "_public"})
+	if name != "rsa_public.pem" {
+		t.Error("Incorrect pem naming convention")
 	}
 }
