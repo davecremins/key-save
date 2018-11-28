@@ -1,17 +1,16 @@
 package keymgt
 
 import (
-	"bufio"
 	"crypto/rsa"
+	"bytes"
 	"crypto/x509"
-	"encoding/pem"
 	"errors"
-	"fmt"
-	"os"
+	"encoding/pem"
+	"io"
 )
 
-func LoadPublicKeyFromPemFile(fileName string) (*rsa.PublicKey, error) {
-	pemBytes := loadKeyFromFile(fileName)
+func LoadPublicKeyFromPemData(reader io.Reader) (*rsa.PublicKey, error) {
+	pemBytes := loadDataFromSource(reader)
 	block, err := decodeBytesToPemBlock(&pemBytes)
 	if err != nil {
 		panic(err)
@@ -24,8 +23,8 @@ func LoadPublicKeyFromPemFile(fileName string) (*rsa.PublicKey, error) {
 	return publicKey, nil
 }
 
-func LoadPrivateKeyFromPemFile(fileName string) (*rsa.PrivateKey, error) {
-	pemBytes := loadKeyFromFile(fileName)
+func LoadPrivateKeyFromPemData(reader io.Reader) (*rsa.PrivateKey, error) {
+	pemBytes := loadDataFromSource(reader)
 	block, err := decodeBytesToPemBlock(&pemBytes)
 	if err != nil {
 		panic(err)
@@ -37,32 +36,16 @@ func LoadPrivateKeyFromPemFile(fileName string) (*rsa.PrivateKey, error) {
 	return privateKey, nil
 }
 
-func loadKeyFromFile(fileName string) []byte {
-	fmt.Println("Will load key from", fileName)
-	pemFile, err := os.Open(fileName)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	defer pemFile.Close()
-
-	pfInfo, _ := pemFile.Stat()
-	size := pfInfo.Size()
-	pemBytes := make([]byte, size)
-
-	buffer := bufio.NewReader(pemFile)
-	buffer.Read(pemBytes)
-
-	fmt.Println("Pem data read successfully.")
-	fmt.Println(string(pemBytes))
-	return pemBytes
+func loadDataFromSource(reader io.Reader) []byte {
+	buffer := new(bytes.Buffer)
+	buffer.ReadFrom(reader)
+	return buffer.Bytes()
 }
 
 func decodeBytesToPemBlock(pemBytes *[]byte) (*pem.Block, error) {
 	block, _ := pem.Decode(*pemBytes)
 	if block == nil {
-		return nil, errors.New("fatal: key decoding error")
+		return nil, errors.New("FATAL: could not decode pem bytes to block")
 	}
 	return block, nil
 }

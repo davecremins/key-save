@@ -1,8 +1,6 @@
 package keymgt
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestCreatePemBlockForPrivateKey(t *testing.T){
 	privateKey, _, _ := CreateRSAKeys(1024)
@@ -40,6 +38,7 @@ func TestErrorIsReturnedForUnsupportedType(t *testing.T){
 	t.Log(err)
 }
 
+// Does this belong here?
 func TestCreateFileNameConvention(t *testing.T){
 	fileName := createFileName(&keyEncoding{keyType: "_public"})
 	if fileName != "rsa_public.pem" {

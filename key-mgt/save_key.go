@@ -15,7 +15,8 @@ type keyEncoding struct {
 	keyType string
 }
 
-//Maybe support file location
+// TODO: File creation should not be part of this package
+// 	 We should write to an io.Writer and rename to encodePemBlockToOutput
 func CreateFile(key interface{}) string {
 	keyEncodingData, err := pemBlockForKey(key)
 	if err != nil {
