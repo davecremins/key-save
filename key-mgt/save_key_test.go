@@ -2,7 +2,7 @@ package keymgt
 
 import "testing"
 
-func TestCreatePemBlockForPrivateKey(t *testing.T){
+func TestCreatePemBlockForPrivateKey(t *testing.T) {
 	privateKey, _, _ := CreateRSAKeys(1024)
 	encodingStruct, err := createPemEncodingStructureForKey(privateKey)
 	if err != nil {
@@ -16,7 +16,7 @@ func TestCreatePemBlockForPrivateKey(t *testing.T){
 	t.Log(*encodingStruct.block)
 }
 
-func TestCreatePemBlockForPublicKey(t *testing.T){
+func TestCreatePemBlockForPublicKey(t *testing.T) {
 	_, publicKey, _ := CreateRSAKeys(1024)
 	encodingStruct, err := createPemEncodingStructureForKey(publicKey)
 	if err != nil {
@@ -30,7 +30,7 @@ func TestCreatePemBlockForPublicKey(t *testing.T){
 	t.Log(*encodingStruct.block)
 }
 
-func TestPemEncodingErrorIsReturnedForUnsupportedType(t *testing.T){
+func TestPemEncodingErrorIsReturnedForUnsupportedType(t *testing.T) {
 	_, err := createPemEncodingStructureForKey("key")
 	if err == nil {
 		t.Error("should have failed with unsuported type")
@@ -38,7 +38,7 @@ func TestPemEncodingErrorIsReturnedForUnsupportedType(t *testing.T){
 	t.Log(err)
 }
 
-func TestCreateNameConvention(t *testing.T){
+func TestCreateNameConvention(t *testing.T) {
 	name := createPemName(&pemEncoding{keyType: "_public"})
 	if name != "rsa_public.pem" {
 		t.Error("Incorrect pem naming convention")

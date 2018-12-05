@@ -1,16 +1,15 @@
 package keymgt
 
 import (
-	"crypto/rsa"
 	"bytes"
+	"crypto/rsa"
 	"crypto/x509"
-	"errors"
 	"encoding/pem"
+	"errors"
 	"io"
-	"fmt"
 )
 
-func LoadPublicKeyFromPemData(reader io.Reader) (*rsa.PublicKey, error) {
+func LoadPublicKeyFromPemData(reader io.Reader) *rsa.PublicKey {
 	pemBytes := loadDataFromSource(reader)
 	block, err := decodeBytesToPemBlock(&pemBytes)
 	if err != nil {
@@ -18,10 +17,10 @@ func LoadPublicKeyFromPemData(reader io.Reader) (*rsa.PublicKey, error) {
 	}
 	pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		return nil, err
+		panic("FATAL: failed to parse DER encoded public key: " + err.Error())
 	}
 	publicKey := pubInterface.(*rsa.PublicKey)
-	return publicKey, nil
+	return publicKey
 }
 
 func LoadPrivateKeyFromPemData(reader io.Reader) (*rsa.PrivateKey, error) {
@@ -30,11 +29,7 @@ func LoadPrivateKeyFromPemData(reader io.Reader) (*rsa.PrivateKey, error) {
 	if err != nil {
 		panic(err)
 	}
-	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-	return privateKey, nil
+	return x509.ParsePKCS1PrivateKey(block.Bytes)
 }
 
 func loadDataFromSource(reader io.Reader) []byte {
@@ -44,7 +39,6 @@ func loadDataFromSource(reader io.Reader) []byte {
 }
 
 func decodeBytesToPemBlock(pemBytes *[]byte) (*pem.Block, error) {
-	fmt.Println(string(*pemBytes)) // TODO: Remove this
 	block, _ := pem.Decode(*pemBytes)
 	if block == nil {
 		return nil, errors.New("FATAL: could not decode pem bytes to block")

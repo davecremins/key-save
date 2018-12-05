@@ -2,11 +2,11 @@ package keymgt
 
 import (
 	"bytes"
-	"io"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"io"
 	"reflect"
 )
 
