@@ -18,13 +18,13 @@ type Job interface {
 }
 
 type Config struct {
-	JobSize int
+	JobSize      int
 	WorkerAmount int
-	Jobs *[]Job
-	LoadBalance bool
+	Jobs         *[]Job
+	LoadBalance  bool
 }
 
-func Create(config Config){
+func Create(config Config) {
 	jobCh := createJobPipe(config.JobSize)
 	sendWorkToPipe(jobCh, config.Jobs)
 	createWorkersForJobPipe(jobCh, config.WorkerAmount)
@@ -44,9 +44,9 @@ func createWorkersForJobPipe(jobPipe chan Job, workerCount int) {
 	wg.Wait()
 }
 
-func sendWorkToPipe(jobPipe chan<- Job, jobs *[]Job){
-	go func () {
-		for _, work := range (*jobs) {
+func sendWorkToPipe(jobPipe chan<- Job, jobs *[]Job) {
+	go func() {
+		for _, work := range *jobs {
 			jobPipe <- work
 		}
 		close(jobPipe)

@@ -1,68 +1,47 @@
 package keymgt
 
 import (
-	"bufio"
+	"bytes"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
-	"fmt"
-	"os"
+	"io"
 )
 
-func LoadPublicKeyFromPemFile(fileName string) (*rsa.PublicKey, error) {
-	pemBytes := loadKeyFromFile(fileName)
+func LoadPublicKeyFromPemData(reader io.Reader) *rsa.PublicKey {
+	pemBytes := loadDataFromSource(reader)
 	block, err := decodeBytesToPemBlock(&pemBytes)
 	if err != nil {
 		panic(err)
 	}
 	pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		return nil, err
+		panic("FATAL: failed to parse DER encoded public key: " + err.Error())
 	}
 	publicKey := pubInterface.(*rsa.PublicKey)
-	return publicKey, nil
+	return publicKey
 }
 
-func LoadPrivateKeyFromPemFile(fileName string) (*rsa.PrivateKey, error) {
-	pemBytes := loadKeyFromFile(fileName)
+func LoadPrivateKeyFromPemData(reader io.Reader) (*rsa.PrivateKey, error) {
+	pemBytes := loadDataFromSource(reader)
 	block, err := decodeBytesToPemBlock(&pemBytes)
 	if err != nil {
 		panic(err)
 	}
-	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-	return privateKey, nil
+	return x509.ParsePKCS1PrivateKey(block.Bytes)
 }
 
-func loadKeyFromFile(fileName string) []byte {
-	fmt.Println("Will load key from", fileName)
-	pemFile, err := os.Open(fileName)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	defer pemFile.Close()
-
-	pfInfo, _ := pemFile.Stat()
-	size := pfInfo.Size()
-	pemBytes := make([]byte, size)
-
-	buffer := bufio.NewReader(pemFile)
-	buffer.Read(pemBytes)
-
-	fmt.Println("Pem data read successfully.")
-	fmt.Println(string(pemBytes))
-	return pemBytes
+func loadDataFromSource(reader io.Reader) []byte {
+	buffer := new(bytes.Buffer)
+	buffer.ReadFrom(reader)
+	return buffer.Bytes()
 }
 
 func decodeBytesToPemBlock(pemBytes *[]byte) (*pem.Block, error) {
 	block, _ := pem.Decode(*pemBytes)
 	if block == nil {
-		return nil, errors.New("fatal: key decoding error")
+		return nil, errors.New("FATAL: could not decode pem bytes to block")
 	}
 	return block, nil
 }

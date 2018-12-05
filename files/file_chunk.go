@@ -19,7 +19,6 @@ func (op *fileOp) Execute() error {
 	return nil
 }
 
-
 func ReadFileInChunks(filepath string, bufferSize int) *[]ops.Chunk {
 	file, err := os.Open(filepath)
 	if err != nil {
@@ -40,10 +39,10 @@ func readInChunks(file io.ReaderAt, dataSize int64, bufferSize int) *[]ops.Chunk
 	chunks := ops.PrepareChunks(dataSize, bufferSize)
 	chunkAmount := len(*chunks)
 	pipelineConfig := pipeline.Config{
-		JobSize: chunkAmount,
+		JobSize:      chunkAmount,
 		WorkerAmount: 10,
-		Jobs: allocateFileOps(file, chunks),
-		LoadBalance: false,
+		Jobs:         allocateFileOps(file, chunks),
+		LoadBalance:  false,
 	}
 	pipeline.Create(pipelineConfig)
 	return chunks
