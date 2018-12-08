@@ -16,7 +16,9 @@ func TestWritingToFileViaChannel(t *testing.T) {
 		close(ch)
 
 	}(byteChan)
-	write(&buf, byteChan, false)
+	finished := make(chan bool)
+	WaitToWrite(&buf, byteChan, finished)
+	<-finished
 	if "Hello World" != buf.String() {
 		t.Error("buffer string contents does not match expected:", buf.String())
 	}
