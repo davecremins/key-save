@@ -26,7 +26,7 @@ func TestWritingToFileViaChannel(t *testing.T) {
 
 func TestReadingOfContentInChunks(t *testing.T) {
 	reader := strings.NewReader("Testing my new reader for the files package")
-	chunks := readInChunks(reader, reader.Size(), 4)
+	chunks := ReadInChunks(reader, reader.Size(), 4)
 	if "Test" != string(*(*chunks)[0].Data) {
 		t.Error("First chunk doesn't contain expected output")
 	}
