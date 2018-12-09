@@ -1,7 +1,10 @@
-# Safe-Deposit-Box [![pipeline status](https://gitlab.com/davecremins/safe-deposit-box/badges/master/pipeline.svg)](https://gitlab.com/davecremins/safe-deposit-box/commits/master)[![coverage report](https://gitlab.com/davecremins/safe-deposit-box/badges/master/coverage.svg)](https://gitlab.com/davecremins/safe-deposit-box/commits/master)
+# Safe Deposit Box [![pipeline status](https://gitlab.com/davecremins/safe-deposit-box/badges/master/pipeline.svg)](https://gitlab.com/davecremins/safe-deposit-box/commits/master)[![coverage report](https://gitlab.com/davecremins/safe-deposit-box/badges/master/coverage.svg)](https://gitlab.com/davecremins/safe-deposit-box/commits/master)
 
-## Functions
-- Create RSA public/private keys
-- Create random AES key
-- Persist/retrieve RSA keys in PEM format
-- Encrypt/decrypt data with RSA
+## Description
+Safe deposit box (SDB) is a tool that secures data. Security of data is provided through the use of industry standard encryption algorithms and schemes. 
+SDB can be used to: 
+- Secure keys, creds, secrets, etc. 
+- Encrypt data before it is persisted 
+- Generate on the fly keys that will have specific lease periods
+- Encrypt data without storing it
+
