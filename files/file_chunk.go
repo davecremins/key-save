@@ -5,6 +5,7 @@ import (
 
 	ops "gitlab.com/davecremins/safe-deposit-box/io-ops"
 	pipeline "gitlab.com/davecremins/safe-deposit-box/pipeline"
+	workers "gitlab.com/davecremins/safe-deposit-box/workers"
 )
 
 type fileOp struct {
@@ -22,7 +23,7 @@ func ReadInChunks(reader io.ReaderAt, dataSize int64, bufferSize int) *[]ops.Chu
 	chunkAmount := len(*chunks)
 	pipelineConfig := pipeline.Config{
 		JobSize:      chunkAmount,
-		WorkerAmount: 10,
+		WorkerAmount: chunkAmount,
 		Jobs:         allocateFileOps(reader, chunks),
 		LoadBalance:  false,
 	}
@@ -30,9 +31,9 @@ func ReadInChunks(reader io.ReaderAt, dataSize int64, bufferSize int) *[]ops.Chu
 	return chunks
 }
 
-func allocateFileOps(reader io.ReaderAt, chunks *[]ops.Chunk) *[]pipeline.Job {
+func allocateFileOps(reader io.ReaderAt, chunks *[]ops.Chunk) *[]workers.Job {
 	amount := len(*chunks)
-	fileOps := make([]pipeline.Job, amount)
+	fileOps := make([]workers.Job, amount)
 	for i := 0; i < amount; i++ {
 		fileOps[i] = &fileOp{handle: reader, data: &(*chunks)[i]}
 	}
