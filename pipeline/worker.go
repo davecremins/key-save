@@ -2,7 +2,8 @@ package pipeline
 
 import (
 	"fmt"
-	"sync"
+
+	workers "gitlab.com/davecremins/safe-deposit-box/workers"
 )
 
 var showInfo = true
@@ -13,14 +14,10 @@ func info(args ...interface{}) {
 	}
 }
 
-type Job interface {
-	Execute() error
-}
-
 type Config struct {
 	JobSize      int
 	WorkerAmount int
-	Jobs         *[]Job
+	Jobs         *[]workers.Job
 	LoadBalance  bool
 }
 
@@ -30,34 +27,23 @@ func Create(config Config) {
 	createWorkersForJobPipe(jobCh, config.WorkerAmount)
 }
 
-func createJobPipe(size int) chan Job {
-	return make(chan Job, size)
+func createJobPipe(size int) workers.JobChannel {
+	return make(workers.JobChannel, size)
 }
 
-func createWorkersForJobPipe(jobPipe chan Job, workerCount int) {
-	fmt.Sprintf("Creating %d workers for pipeline", workerCount)
-	var wg sync.WaitGroup
-	for w := 0; w < workerCount; w++ {
-		wg.Add(1)
-		go createWorker(w+1, jobPipe, &wg)
-	}
-	wg.Wait()
+func createWorkersForJobPipe(jobPipe workers.JobChannel, workerCount int) {
+	dispatcher := workers.NewDispatcher(workerCount)
+	dispatcher.CreateWorkers()
+	dispatcher.DispatchFrom(jobPipe)
+	dispatcher.WaitForCompletion()
+	info("Pipeline complete")
 }
 
-func sendWorkToPipe(jobPipe chan<- Job, jobs *[]Job) {
+func sendWorkToPipe(jobPipe chan<- workers.Job, jobs *[]workers.Job) {
 	go func() {
 		for _, work := range *jobs {
 			jobPipe <- work
 		}
 		close(jobPipe)
 	}()
-}
-
-func createWorker(id int, jobPipe <-chan Job, wg *sync.WaitGroup) {
-	for work := range jobPipe {
-		info("Processing job in worker:", id)
-		work.Execute()
-		info("Finished processing job in worker:", id)
-	}
-	wg.Done()
 }

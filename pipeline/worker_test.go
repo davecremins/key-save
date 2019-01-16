@@ -1,6 +1,10 @@
 package pipeline
 
-import "testing"
+import (
+	"testing"
+
+	workers "gitlab.com/davecremins/safe-deposit-box/workers"
+)
 
 type mock struct{}
 
@@ -25,7 +29,7 @@ func TestPipelineCreation(t *testing.T) {
 
 func TestSendingWorkToPipeline(t *testing.T) {
 	pipeline := createJobPipe(10)
-	jobs := make([]Job, 1)
+	jobs := make([]workers.Job, 1)
 	jobs[0] = &mock{}
 	sendWorkToPipe(pipeline, &jobs)
 }
