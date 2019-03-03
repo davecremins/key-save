@@ -1,4 +1,4 @@
-.PHONY: all test coverage format
+.PHONY: all test coverage format singletest
 
 all: get build install
 
@@ -17,6 +17,9 @@ format:
 test:
 	go test ./... -v -coverprofile .coverage.txt
 	go tool cover -func .coverage.txt
+
+singletest:
+	go test -run $(testname) $(package) -v
 
 coverage: test
 	go tool cover -html=.coverage.txt
