@@ -1,6 +1,5 @@
 package apps
 
-type Runnable interface
-{
+type Runnable interface {
 	Run()
 }
