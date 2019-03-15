@@ -1,13 +1,13 @@
 package apps
 
 import (
-	"os"
-	"io/ioutil"
 	"flag"
-	"path/filepath"
 	log "github.com/sirupsen/logrus"
-	km "gitlab.com/davecremins/safe-deposit-box/key-mgt"
 	"gitlab.com/davecremins/safe-deposit-box/cipher"
+	km "gitlab.com/davecremins/safe-deposit-box/key-mgt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 )
 
 const (
