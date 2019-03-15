@@ -14,7 +14,9 @@ const (
 type CLI struct{}
 
 func (c *CLI) Run() {
-	log.SetFormatter(&log.JSONFormatter{})
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp: true,
+	})
 	log.Info("Starting CLI")
 
 	operationPtr := flag.String("op", "encrypt", "Operation to perform - encrypt|decrypt")
