@@ -84,10 +84,11 @@ func encryptionProcess(dataPath string) {
 	checkErr(err)
 	encryptedFile.Close()
 
-	log.Info("Wrote %d bytes.\n", bytesWritten)
+	log.Infof("Wrote %d bytes.\n", bytesWritten)
 
 	delErr := os.Remove(dataPath)
 	checkErr(delErr)
+	log.Infof("Original file '%s' has been removed", dataPath)
 
-	log.Info("base64 key used during encryption process:", km.ConvertToBase64Str(key))
+	log.Info("base64 key used during encryption process: ", km.ConvertToBase64Str(key))
 }

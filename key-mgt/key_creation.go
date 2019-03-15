@@ -49,3 +49,7 @@ func CreateRandomKeyBytes(keySize int) ([]byte, error) {
 func ConvertToBase64Str(key []byte) string {
 	return base64.StdEncoding.EncodeToString(key)
 }
+
+func ConvertBase64StrToBytes(key string) ([]byte, error) {
+	return base64.StdEncoding.DecodeString(key)
+}
