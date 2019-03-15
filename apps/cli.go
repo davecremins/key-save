@@ -4,6 +4,7 @@ import (
 	"os"
 	"io/ioutil"
 	"flag"
+	"path/filepath"
 	log "github.com/sirupsen/logrus"
 	km "gitlab.com/davecremins/safe-deposit-box/key-mgt"
 	"gitlab.com/davecremins/safe-deposit-box/cipher"
@@ -23,15 +24,18 @@ func (c *CLI) Run() {
 	})
 	log.Info("Starting CLI")
 
-	operationPtr := flag.String("op", "encrypt", "Operation to perform - encrypt|decrypt")
-	//keyPtr := flag.String("key", empty, "Security key")
-	dataLocationPtr := flag.String("datapath", empty, "Path to file containing data")
+	var operation, dataPath, key string
+
+	flag.StringVar(&operation, "op", "encrypt", "Operation to perform - encrypt|decrypt")
+	flag.StringVar(&key, "key", empty, "Security key")
+	flag.StringVar(&dataPath, "datapath", empty, "Path to file containing data")
 
 	flag.Parse()
 
-	switch *operationPtr {
+	switch operation {
 	case encrypt:
-		log.Info("Encryption operation requested")
+		log.Info("Encryption option requested")
+		encryptionProcess(dataPath)
 	case decrypt:
 		log.Info("Decryption operation requested")
 	default:
@@ -42,55 +46,48 @@ func (c *CLI) Run() {
 		log.Fatal("Requested operation requires a key")
 	}*/
 
-	if *dataLocationPtr == empty {
+}
+
+func checkErr(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func encryptionProcess(dataPath string) {
+	if dataPath == empty {
 		log.Fatal("Requested operation requires a path to the file containing the data")
 	}
 
-	// Open file from data location
-	file, err := os.Open(*dataLocationPtr)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
+	fileToBeEncrypted, err := os.Open(dataPath)
+	checkErr(err)
 
-	// Read in file
-	fileData, err := ioutil.ReadAll(file)
-	if err != nil {
-		log.Fatal(err)
-	}
+	fileData, err := ioutil.ReadAll(fileToBeEncrypted)
+	checkErr(err)
+	fileToBeEncrypted.Close()
 
-	// Generate random key
 	key, err := km.CreateRandomKeyBytes(24)
-	if err != nil {
-		log.Fatal(err)
-	}
+	checkErr(err)
 
-	// encrypt the file
 	encrypted, err := cipher.AESGCMEncrypt(&fileData, &key)
-	if err != nil {
-		log.Fatal(err)
-	}
+	checkErr(err)
 
-	// write to new file
+	encryptedFileName := filepath.Base(dataPath) + ".sdb"
 	encryptedFile, err := os.OpenFile(
-		"encrypted.data",
+		encryptedFileName,
 		os.O_WRONLY|os.O_TRUNC|os.O_CREATE,
 		0666,
 	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer encryptedFile.Close()
+	checkErr(err)
 
-	// Write bytes to file
 	bytesWritten, err := encryptedFile.Write(encrypted)
-	if err != nil {
-		log.Fatal(err)
-	}
+	checkErr(err)
+	encryptedFile.Close()
+
 	log.Info("Wrote %d bytes.\n", bytesWritten)
 
-	// delete original
+	delErr := os.Remove(dataPath)
+	checkErr(delErr)
 
-	// show key to user
-	log.Info("Key used during encryption process:", string(key[:])) 
+	log.Info("base64 key used during encryption process:", km.ConvertToBase64Str(key))
 }
