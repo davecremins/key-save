@@ -12,9 +12,10 @@ import (
 )
 
 const (
-	empty   = "none"
-	encrypt = "encrypt"
-	decrypt = "decrypt"
+	empty     = "none"
+	encrypt   = "encrypt"
+	decrypt   = "decrypt"
+	extension = ".sdb"
 )
 
 type CLI struct{}
@@ -23,6 +24,7 @@ func (c *CLI) Run() {
 	log.SetFormatter(&log.TextFormatter{
 		FullTimestamp: true,
 	})
+
 	log.Info("Starting CLI")
 
 	var operation, dataPath, key string
@@ -44,10 +46,6 @@ func (c *CLI) Run() {
 		log.Fatal("Unsupported operation requested")
 	}
 
-	/*if *keyPtr == empty {
-		log.Fatal("Requested operation requires a key")
-	}*/
-
 }
 
 func checkErr(err error) {
@@ -56,41 +54,54 @@ func checkErr(err error) {
 	}
 }
 
+func loadContentsOfFile(dataPath string) []byte {
+	file, err := os.Open(dataPath)
+	checkErr(err)
+	defer file.Close()
+
+	fileData, err := ioutil.ReadAll(file)
+	checkErr(err)
+
+	return fileData
+}
+
+func writeToNewFile(fileName string, content []byte) {
+	file, err := os.OpenFile(
+		fileName,
+		os.O_WRONLY|os.O_TRUNC|os.O_CREATE,
+		0666,
+	)
+	checkErr(err)
+	defer file.Close()
+
+	bytesWritten, err := file.Write(content)
+	checkErr(err)
+
+	log.Infof("Wrote %d bytes.\n", bytesWritten)
+}
+
+func removeFile(dataPath string) {
+	delErr := os.Remove(dataPath)
+	checkErr(delErr)
+	log.Infof("Original file '%s' has been removed", dataPath)
+}
+
 func encryptionProcess(dataPath string) {
 	if dataPath == empty {
 		log.Fatal("Requested operation requires a path to the file containing the data")
 	}
 
-	fileToBeEncrypted, err := os.Open(dataPath)
-	checkErr(err)
-
-	fileData, err := ioutil.ReadAll(fileToBeEncrypted)
-	checkErr(err)
-	fileToBeEncrypted.Close()
-
+	fileData := loadContentsOfFile(dataPath)
 	key, err := km.CreateRandomKeyBytes(24)
 	checkErr(err)
 
 	encrypted, err := cipher.AESGCMEncrypt(&fileData, &key)
 	checkErr(err)
 
-	encryptedFileName := filepath.Base(dataPath) + ".sdb"
-	encryptedFile, err := os.OpenFile(
-		encryptedFileName,
-		os.O_WRONLY|os.O_TRUNC|os.O_CREATE,
-		0666,
-	)
-	checkErr(err)
+	encryptedFileName := filepath.Base(dataPath) + extension
+	writeToNewFile(encryptedFileName, encrypted)
 
-	bytesWritten, err := encryptedFile.Write(encrypted)
-	checkErr(err)
-	encryptedFile.Close()
-
-	log.Infof("Wrote %d bytes.\n", bytesWritten)
-
-	delErr := os.Remove(dataPath)
-	checkErr(delErr)
-	log.Infof("Original file '%s' has been removed", dataPath)
+	removeFile(dataPath)
 
 	log.Info("base64 key used during encryption process: ", km.ConvertToBase64Str(key))
 }
@@ -100,13 +111,11 @@ func decryptionProcess(dataPath string, key string) {
 		log.Fatal("Requested operation requires a path to the file containing the data")
 	}
 
-	fileToBeDecrypted, err := os.Open(dataPath)
-	checkErr(err)
+	if key == empty {
+		log.Fatal("Requested operation requires a key")
+	}
 
-	fileData, err := ioutil.ReadAll(fileToBeDecrypted)
-	checkErr(err)
-	fileToBeDecrypted.Close()
-
+	fileData := loadContentsOfFile(dataPath)
 	byteKey, err := km.ConvertBase64StrToBytes(key)
 	checkErr(err)
 
@@ -115,20 +124,7 @@ func decryptionProcess(dataPath string, key string) {
 
 	decryptedFileName := filepath.Base(dataPath)
 	decryptedFileName = strings.TrimRight(decryptedFileName, filepath.Ext(decryptedFileName))
-	plaintextFile, err := os.OpenFile(
-		decryptedFileName,
-		os.O_WRONLY|os.O_TRUNC|os.O_CREATE,
-		0666,
-	)
-	checkErr(err)
+	writeToNewFile(decryptedFileName, plaintext)
 
-	bytesWritten, err := plaintextFile.Write(plaintext)
-	checkErr(err)
-	plaintextFile.Close()
-
-	log.Infof("Wrote %d bytes.\n", bytesWritten)
-
-	delErr := os.Remove(dataPath)
-	checkErr(delErr)
-	log.Infof("Original file '%s' has been removed", dataPath)
+	removeFile(dataPath)
 }
