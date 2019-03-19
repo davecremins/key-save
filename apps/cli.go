@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const (
@@ -38,6 +39,7 @@ func (c *CLI) Run() {
 		encryptionProcess(dataPath)
 	case decrypt:
 		log.Info("Decryption operation requested")
+		decryptionProcess(dataPath, key)
 	default:
 		log.Fatal("Unsupported operation requested")
 	}
@@ -91,4 +93,42 @@ func encryptionProcess(dataPath string) {
 	log.Infof("Original file '%s' has been removed", dataPath)
 
 	log.Info("base64 key used during encryption process: ", km.ConvertToBase64Str(key))
+}
+
+func decryptionProcess(dataPath string, key string) {
+	if dataPath == empty {
+		log.Fatal("Requested operation requires a path to the file containing the data")
+	}
+
+	fileToBeDecrypted, err := os.Open(dataPath)
+	checkErr(err)
+
+	fileData, err := ioutil.ReadAll(fileToBeDecrypted)
+	checkErr(err)
+	fileToBeDecrypted.Close()
+
+	byteKey, err := km.ConvertBase64StrToBytes(key)
+	checkErr(err)
+
+	plaintext, err := cipher.AESGCMDecrypt(&fileData, &byteKey)
+	checkErr(err)
+
+	decryptedFileName := filepath.Base(dataPath)
+	decryptedFileName = strings.TrimRight(decryptedFileName, filepath.Ext(decryptedFileName))
+	plaintextFile, err := os.OpenFile(
+		decryptedFileName,
+		os.O_WRONLY|os.O_TRUNC|os.O_CREATE,
+		0666,
+	)
+	checkErr(err)
+
+	bytesWritten, err := plaintextFile.Write(plaintext)
+	checkErr(err)
+	plaintextFile.Close()
+
+	log.Infof("Wrote %d bytes.\n", bytesWritten)
+
+	delErr := os.Remove(dataPath)
+	checkErr(delErr)
+	log.Infof("Original file '%s' has been removed", dataPath)
 }
