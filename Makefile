@@ -12,7 +12,7 @@ install:
 	go install ./...
 
 format:
-	gofmt -w .
+	gofmt -w -s .
 
 test:
 	go test ./... -v -coverprofile .coverage.txt

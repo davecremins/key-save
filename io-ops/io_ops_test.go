@@ -55,3 +55,23 @@ func TestPanicInChunking(t *testing.T) {
 	part := Chunk{Size: 12, Offset: int64(0)}
 	ReadIntoChunk(reader, &part)
 }
+
+func TestReadingOfChunks(t *testing.T) {
+	const chunkCount = 3
+	data := []byte("5\nFirstHelloWorld")
+	chunks := ReadChunks(data)
+
+	if len(chunks) != chunkCount {
+		t.Error("reading failed to extract correct amount of chunks")
+	}
+
+	chunk := chunks[1]
+	expected := []byte("First")
+
+	if !bytes.Equal(expected, *(chunk.Data)) {
+		t.Error("read failed to extract correct data")
+		t.Log(string(*(chunk.Data)))
+		t.Log(string(*(chunk.Data)))
+		t.Log(string(*(chunk.Data)))
+	}
+}
