@@ -73,3 +73,12 @@ func TestReadingOfChunks(t *testing.T) {
 		t.Log(string(*(chunk.Data)))
 	}
 }
+
+func TestExtractionOfChunkSize(t *testing.T) {
+	expectedChunkSize := 2048
+	data := strings.NewReader("2048\n")
+	actualChunkSize, _, _ := extractChunkSize(data)
+	if expectedChunkSize != actualChunkSize {
+		t.Errorf("Expected %d but got %d", expectedChunkSize, actualChunkSize)
+	}
+}

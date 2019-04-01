@@ -52,30 +52,32 @@ func ReadIntoChunk(handle io.ReaderAt, part *Chunk) {
 	part.Data = &buffer
 }
 
-func extractChunkSize(reader io.Reader) (sizeStr string, firstChunkPos int, err error) {
+func extractChunkSize(reader io.Reader) (size, firstChunkPos int, err error) {
 	br := bufio.NewReader(reader)
-	chunkSize, err := br.ReadString(Delimiter)
+	chunkNumberStr, err := br.ReadString(Delimiter)
 	if err != nil {
-		return "", 0, err
+		return 0, 0, err
 	}
-	return chunkSize, len(chunkSize), nil
+	firstChunkPos = len(chunkNumberStr)
+
+	// Remove delimiter
+	chunkNumberStr = strings.TrimSuffix(chunkNumberStr, string(Delimiter))
+	chunkSize, err := strconv.Atoi(chunkNumberStr)
+	if err != nil {
+		panic(errors.New("fatal: unable to convert chunk number to int"))
+	}
+	return chunkSize, firstChunkPos, nil
 }
 
 func ReadChunks(b []byte) []Chunk {
 	reader := bytes.NewReader(b)
-	chunkSizeStr, firstChunkPos, err := extractChunkSize(reader)
+	chunkSize, firstChunkPos, err := extractChunkSize(reader)
 	if err != nil {
 		panic(errors.New("fatal: unable to extract chunk size"))
 	}
 
 	reader.Seek(int64(firstChunkPos), 0)
-	chunkSizeStr = strings.TrimSuffix(chunkSizeStr, string(Delimiter))
-	blockSize, err := strconv.Atoi(chunkSizeStr)
-	if err != nil {
-		panic(errors.New("fatal: unable to convert chunk size to int"))
-	}
-
-	data := make([]byte, blockSize)
+	data := make([]byte, chunkSize)
 	chunks := []Chunk{}
 
 	for {
