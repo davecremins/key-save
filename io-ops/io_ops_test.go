@@ -65,13 +65,11 @@ func TestReadingOfChunks(t *testing.T) {
 		t.Error("reading failed to extract correct amount of chunks")
 	}
 
-	chunk := chunks[1]
+	chunk := chunks[0]
 	expected := []byte("First")
 
 	if !bytes.Equal(expected, *(chunk.Data)) {
 		t.Error("read failed to extract correct data")
-		t.Log(string(*(chunk.Data)))
-		t.Log(string(*(chunk.Data)))
 		t.Log(string(*(chunk.Data)))
 	}
 }

@@ -52,13 +52,6 @@ func ReadIntoChunk(handle io.ReaderAt, part *Chunk) {
 	part.Data = &buffer
 }
 
-func reverseChunks(chunks pChunkSlice) {
-	chunkLength := len(*chunks)
-	for i, j := 0, chunkLength-1; i<j; i, j = i+1, j-1 {
-		(*chunks)[i], (*chunks)[j] = (*chunks)[j], (*chunks)[i]
-	}
-}
-
 func extractChunkSize(reader io.Reader) (sizeStr string, firstChunkPos int, err error) {
 	br := bufio.NewReader(reader)
 	chunkSize, err := br.ReadString(Delimiter)
@@ -90,12 +83,11 @@ func ReadChunks(b []byte) []Chunk {
 		if err == io.EOF {
 			break
 		}
-		dataChunk := data[:n]
+		dataChunk := make([]byte, n)
+		copy(dataChunk, data[:n])
 		c := Chunk{Size: n, Data: &dataChunk}
 		chunks = append(chunks, c)
 	}
-
-	//reverseChunks(&chunks)
 
 	return chunks
 }
