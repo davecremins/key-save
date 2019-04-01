@@ -6,6 +6,15 @@ import (
 	"testing"
 )
 
+func CatchPanic(t *testing.T, customMsg string){
+	r := recover()
+	if r == nil {
+		t.Errorf(customMsg)
+	} else {
+		t.Log("panic raised:", r)
+	}
+}
+
 func TestChunkCalculation(t *testing.T) {
 	chunks := PrepareChunks(10089, 128)
 	expectedChunkCount := func(Size, bufferSize int) int {
@@ -42,15 +51,7 @@ func TestChunkingOfReader(t *testing.T) {
 }
 
 func TestPanicInChunking(t *testing.T) {
-	defer func() {
-		r := recover()
-		if r == nil {
-			t.Errorf("chunked reading should have paniced with EOF error")
-		} else {
-			t.Log("panic raised:", r)
-		}
-	}()
-
+	defer CatchPanic(t, "chunked reading should have paniced with EOF error")
 	reader := strings.NewReader("Hello World")
 	part := Chunk{Size: 12, Offset: int64(0)}
 	ReadIntoChunk(reader, &part)
@@ -80,5 +81,28 @@ func TestExtractionOfChunkSize(t *testing.T) {
 	actualChunkSize, _, _ := extractChunkSize(data)
 	if expectedChunkSize != actualChunkSize {
 		t.Errorf("Expected %d but got %d", expectedChunkSize, actualChunkSize)
+	}
+}
+
+func TestExtractionOfFirstChunkPos(t *testing.T) {
+	expectedFirstChunkPos := 2
+	data := strings.NewReader("5\nHello")
+	_, actualFirstChunkPos, _ := extractChunkSize(data)
+	if expectedFirstChunkPos != actualFirstChunkPos {
+		t.Errorf("Expected %d but got %d", expectedFirstChunkPos, actualFirstChunkPos)
+	}
+}
+
+func TestPanicInChunkSizeExtraction(t *testing.T) {
+	// Delimited data that will fail conversion
+	defer CatchPanic(t, "failed to extract chunk size")
+	extractChunkSize(strings.NewReader("asdf\n"))
+}
+
+func TestErrorInChunkSizeExtraction(t *testing.T) {
+	// No delimiter
+	_, _, err := extractChunkSize(strings.NewReader("800"))
+	if err == nil {
+		t.Error("Error should have been returned for malformed input - no delimiter")
 	}
 }
