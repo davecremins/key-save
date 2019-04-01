@@ -1,13 +1,13 @@
 package ioops
 
 import (
-	"fmt"
-	"io"
 	"bufio"
-	"strings"
-	"strconv"
 	"bytes"
 	"errors"
+	"fmt"
+	"io"
+	"strconv"
+	"strings"
 )
 
 const Delimiter = '\n'

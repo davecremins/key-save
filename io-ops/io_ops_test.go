@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func CatchPanic(t *testing.T, customMsg string){
+func CatchPanic(t *testing.T, customMsg string) {
 	r := recover()
 	if r == nil {
 		t.Errorf(customMsg)
