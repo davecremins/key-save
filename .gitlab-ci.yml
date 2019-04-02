@@ -1,6 +1,7 @@
-image: golang:1.10-stretch
+image: golang:1.12.1-stretch
 
 stages:
+  - lint
   - build
 
 before_script:
@@ -10,6 +11,11 @@ before_script:
   - ln -s /builds/davecremins/safe-deposit-box /go/src/gitlab.com/davecremins
   - cd /go/src/gitlab.com/davecremins/safe-deposit-box
 
+lint:
+  stage: lint
+  script:
+    - go get -u github.com/mgechev/revive
+    - revive -config config.toml -formatter stylish gitlab.com/davecremins/safe-deposit-box/...
 build:
   stage: build
   script:
