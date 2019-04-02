@@ -1,8 +1,17 @@
 image: golang:1.12.1-stretch
 
+cache:
+  paths:
+    - /apt-cache
+    - /go/src/github.com
+    - /go/src/golang.org
+    - /go/src/google.golang.org
+    - /go/src/gopkg.in
+
 stages:
   - lint
   - build
+  - test
 
 before_script:
   - apt-get update && apt-get install -y make curl
@@ -16,9 +25,13 @@ lint:
   script:
     - go get -u github.com/mgechev/revive
     - revive -config config.toml -formatter stylish /go/src/gitlab.com/davecremins/safe-deposit-box/...
+
 build:
   stage: build
   script:
     - make all
-    - make test
 
+test:
+  stage: test
+  script:
+    - make test
