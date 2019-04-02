@@ -9,6 +9,8 @@ import (
 	"io"
 )
 
+// LoadPublicKeyFromPemData extracts the pem encoded public key
+// and converts it to a public key structure.
 func LoadPublicKeyFromPemData(reader io.Reader) *rsa.PublicKey {
 	pemBytes := loadDataFromSource(reader)
 	block, err := decodeBytesToPemBlock(&pemBytes)
@@ -23,6 +25,8 @@ func LoadPublicKeyFromPemData(reader io.Reader) *rsa.PublicKey {
 	return publicKey
 }
 
+// LoadPrivateKeyFromPemData extracts the pem encoded private key
+// and converts it to a private key structure.
 func LoadPrivateKeyFromPemData(reader io.Reader) (*rsa.PrivateKey, error) {
 	pemBytes := loadDataFromSource(reader)
 	block, err := decodeBytesToPemBlock(&pemBytes)

@@ -14,6 +14,7 @@ func info(args ...interface{}) {
 	}
 }
 
+// Config contains the configuration for a pipeline.
 type Config struct {
 	JobSize      int
 	WorkerAmount int
@@ -21,6 +22,8 @@ type Config struct {
 	LoadBalance  bool
 }
 
+// Create initialises a new pipeline by creating a job channel,
+// sending work to it and creating workers to process work on the channel.
 func Create(config Config) {
 	jobCh := createJobPipe(config.JobSize)
 	sendWorkToPipe(jobCh, config.Jobs)
