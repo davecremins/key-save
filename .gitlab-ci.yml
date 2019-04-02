@@ -34,4 +34,5 @@ build:
 test:
   stage: test
   script:
+    - make get
     - make test
