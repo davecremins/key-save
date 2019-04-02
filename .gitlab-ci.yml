@@ -15,7 +15,7 @@ lint:
   stage: lint
   script:
     - go get -u github.com/mgechev/revive
-    - revive -config config.toml -formatter stylish gitlab.com/davecremins/safe-deposit-box/...
+    - revive -config config.toml -formatter stylish /go/src/gitlab.com/davecremins/safe-deposit-box/...
 build:
   stage: build
   script:
