@@ -18,6 +18,8 @@ func (op *fileOp) Execute() error {
 	return nil
 }
 
+// ReadInChunks calculates the offsets of the chunks, creates a pipeline configuration
+// and executes it to have the workers read the chunks concurrently.
 func ReadInChunks(reader io.ReaderAt, dataSize int64, bufferSize int) *[]ops.Chunk {
 	chunks := ops.PrepareChunks(dataSize, bufferSize)
 	chunkAmount := len(*chunks)

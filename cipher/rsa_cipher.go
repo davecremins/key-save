@@ -6,7 +6,7 @@ import (
 	"crypto/sha256"
 )
 
-// TODO: Use better random label
+// RSAEncrypt encrypts the given content using RSA-OAEP. 
 func RSAEncrypt(content *[]byte, publicKey *rsa.PublicKey) ([]byte, error) {
 	label := []byte("")
 	hash := sha256.New()
@@ -20,7 +20,7 @@ func RSAEncrypt(content *[]byte, publicKey *rsa.PublicKey) ([]byte, error) {
 	return ciphertext, nil
 }
 
-// TODO: Use better random label
+// RSADecrypt decrypts the given ciphertext using RSA-OAEP. 
 func RSADecrypt(ciphertext *[]byte, privateKey *rsa.PrivateKey) ([]byte, error) {
 	label := []byte("")
 	hash := sha256.New()
