@@ -10,12 +10,12 @@ func TestCreationOfDispatcher(t *testing.T) {
 	}
 }
 
-func TestCreationOfWorkersFromDispatcher(t *testing.T) {
+func TestCreationOfWorkersFromDispatcher(_ *testing.T) {
 	dispatcher := NewDispatcher(5)
 	dispatcher.CreateWorkers()
 }
 
-func TestDispatchFromDispatcher(t *testing.T) {
+func TestDispatchFromDispatcher(_ *testing.T) {
 	dispatcher := NewDispatcher(5)
 	jobQueue := make(chan Job, 5)
 	dispatcher.DispatchFrom(jobQueue)
