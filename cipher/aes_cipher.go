@@ -8,6 +8,8 @@ import (
 	"io"
 )
 
+// AESGCMEncrypt encrypts plaintext with the provided key using the
+// Galois/Counter Mode of operation with the AES algorithm.
 func AESGCMEncrypt(plaintext *[]byte, key *[]byte) ([]byte, error) {
 	c, err := aes.NewCipher(*key)
 	if err != nil {
@@ -27,6 +29,8 @@ func AESGCMEncrypt(plaintext *[]byte, key *[]byte) ([]byte, error) {
 	return gcm.Seal(nonce, nonce, *plaintext, nil), nil
 }
 
+// AESGCMDecrypt decrypts ciphertext with the provided key using the
+// Galois/Counter Mode of operation with the AES algorithm.
 func AESGCMDecrypt(ciphertext *[]byte, key *[]byte) ([]byte, error) {
 	c, err := aes.NewCipher(*key)
 	if err != nil {

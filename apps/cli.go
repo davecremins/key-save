@@ -18,8 +18,11 @@ const (
 	extension = ".sdb"
 )
 
+// CLI is an implementation of a command line interface.
 type CLI struct{}
 
+// Run is an interface implemented by CLI that provides the capability
+// to encrypt and decrypt data.
 func (c *CLI) Run() {
 	log.SetFormatter(&log.TextFormatter{
 		FullTimestamp: true,

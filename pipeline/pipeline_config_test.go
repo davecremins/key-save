@@ -27,14 +27,14 @@ func TestPipelineCreation(t *testing.T) {
 	}
 }
 
-func TestSendingWorkToPipeline(t *testing.T) {
+func TestSendingWorkToPipeline(_ *testing.T) {
 	pipeline := createJobPipe(10)
 	jobs := make([]workers.Job, 1)
 	jobs[0] = &mock{}
 	sendWorkToPipe(pipeline, &jobs)
 }
 
-func TestWorkerCreation(t *testing.T) {
+func TestWorkerCreation(_ *testing.T) {
 	pipeline := createJobPipe(3)
 	pipeline <- &mock{}
 	pipeline <- &mock{}
