@@ -4,9 +4,8 @@ import (
 	"flag"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/davecremins/safe-deposit-box/cipher"
+	. "gitlab.com/davecremins/safe-deposit-box/files"
 	km "gitlab.com/davecremins/safe-deposit-box/key-mgt"
-	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 )
@@ -20,6 +19,12 @@ const (
 
 // CLI is an implementation of a command line interface.
 type CLI struct{}
+
+func checkErr(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
 // Run is an interface implemented by CLI that provides the capability
 // to encrypt and decrypt data.
@@ -51,50 +56,12 @@ func (c *CLI) Run() {
 
 }
 
-func checkErr(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func loadContentsOfFile(dataPath string) []byte {
-	file, err := os.Open(dataPath)
-	checkErr(err)
-	defer file.Close()
-
-	fileData, err := ioutil.ReadAll(file)
-	checkErr(err)
-
-	return fileData
-}
-
-func writeToNewFile(fileName string, content []byte) {
-	file, err := os.OpenFile(
-		fileName,
-		os.O_WRONLY|os.O_TRUNC|os.O_CREATE,
-		0666,
-	)
-	checkErr(err)
-	defer file.Close()
-
-	bytesWritten, err := file.Write(content)
-	checkErr(err)
-
-	log.Infof("Wrote %d bytes.\n", bytesWritten)
-}
-
-func removeFile(dataPath string) {
-	delErr := os.Remove(dataPath)
-	checkErr(delErr)
-	log.Infof("Original file '%s' has been removed", dataPath)
-}
-
 func encryptionProcess(dataPath string) {
 	if dataPath == empty {
 		log.Fatal("Requested operation requires a path to the file containing the data")
 	}
 
-	fileData := loadContentsOfFile(dataPath)
+	fileData := LoadContentsOfFile(dataPath)
 	key, err := km.CreateRandomKeyBytes(24)
 	checkErr(err)
 
@@ -102,9 +69,9 @@ func encryptionProcess(dataPath string) {
 	checkErr(err)
 
 	encryptedFileName := filepath.Base(dataPath) + extension
-	writeToNewFile(encryptedFileName, encrypted)
+	WriteToNewFile(encryptedFileName, encrypted)
 
-	removeFile(dataPath)
+	RemoveFile(dataPath)
 
 	log.Info("base64 key used during encryption process: ", km.ConvertToBase64Str(key))
 }
@@ -118,7 +85,7 @@ func decryptionProcess(dataPath string, key string) {
 		log.Fatal("Requested operation requires a key")
 	}
 
-	fileData := loadContentsOfFile(dataPath)
+	fileData := LoadContentsOfFile(dataPath)
 	byteKey, err := km.ConvertBase64StrToBytes(key)
 	checkErr(err)
 
@@ -127,7 +94,7 @@ func decryptionProcess(dataPath string, key string) {
 
 	decryptedFileName := filepath.Base(dataPath)
 	decryptedFileName = strings.TrimRight(decryptedFileName, filepath.Ext(decryptedFileName))
-	writeToNewFile(decryptedFileName, plaintext)
+	WriteToNewFile(decryptedFileName, plaintext)
 
-	removeFile(dataPath)
+	RemoveFile(dataPath)
 }
