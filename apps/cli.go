@@ -4,7 +4,7 @@ import (
 	"flag"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/davecremins/safe-deposit-box/cipher"
-	. "gitlab.com/davecremins/safe-deposit-box/files"
+	"gitlab.com/davecremins/safe-deposit-box/files"
 	km "gitlab.com/davecremins/safe-deposit-box/key-mgt"
 	"path/filepath"
 	"strings"
@@ -61,7 +61,7 @@ func encryptionProcess(dataPath string) {
 		log.Fatal("Requested operation requires a path to the file containing the data")
 	}
 
-	fileData := LoadContentsOfFile(dataPath)
+	fileData := files.LoadContentsOfFile(dataPath)
 	key, err := km.CreateRandomKeyBytes(24)
 	checkErr(err)
 
@@ -69,9 +69,9 @@ func encryptionProcess(dataPath string) {
 	checkErr(err)
 
 	encryptedFileName := filepath.Base(dataPath) + extension
-	WriteToNewFile(encryptedFileName, encrypted)
+	files.WriteToNewFile(encryptedFileName, encrypted)
 
-	RemoveFile(dataPath)
+	files.RemoveFile(dataPath)
 
 	log.Info("base64 key used during encryption process: ", km.ConvertToBase64Str(key))
 }
@@ -85,7 +85,7 @@ func decryptionProcess(dataPath string, key string) {
 		log.Fatal("Requested operation requires a key")
 	}
 
-	fileData := LoadContentsOfFile(dataPath)
+	fileData := files.LoadContentsOfFile(dataPath)
 	byteKey, err := km.ConvertBase64StrToBytes(key)
 	checkErr(err)
 
@@ -94,7 +94,7 @@ func decryptionProcess(dataPath string, key string) {
 
 	decryptedFileName := filepath.Base(dataPath)
 	decryptedFileName = strings.TrimRight(decryptedFileName, filepath.Ext(decryptedFileName))
-	WriteToNewFile(decryptedFileName, plaintext)
+	files.WriteToNewFile(decryptedFileName, plaintext)
 
-	RemoveFile(dataPath)
+	files.RemoveFile(dataPath)
 }
