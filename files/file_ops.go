@@ -12,7 +12,8 @@ func checkErr(err error) {
 	}
 }
 
-// Load entire contents of file specified by the dataPath parameter
+// LoadContentsOfFile reads the entire contents of the file 
+// specified by the dataPath parameter.
 func LoadContentsOfFile(dataPath string) []byte {
 	file, err := os.Open(dataPath)
 	checkErr(err)
@@ -24,7 +25,8 @@ func LoadContentsOfFile(dataPath string) []byte {
 	return fileData
 }
 
-// Write contents of byte slice to file specified by fileName
+// WriteToNewFile writes  contents of byte slice to file specified
+// by the fileName parameter.
 func WriteToNewFile(fileName string, content []byte) {
 	file, err := os.OpenFile(
 		fileName,
@@ -40,7 +42,7 @@ func WriteToNewFile(fileName string, content []byte) {
 	log.Infof("Wrote %d bytes.\n", bytesWritten)
 }
 
-// Remove file specifed by dataPath parameter
+// RemoveFile deletes the file specifed by the dataPath parameter.
 func RemoveFile(dataPath string) {
 	delErr := os.Remove(dataPath)
 	checkErr(delErr)
