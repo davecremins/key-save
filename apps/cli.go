@@ -14,6 +14,7 @@ const (
 	empty     = "none"
 	encrypt   = "encrypt"
 	decrypt   = "decrypt"
+	keygen    = "keygen"
 	extension = ".sdb"
 )
 
@@ -37,9 +38,9 @@ func (c *CLI) Run() {
 
 	var operation, dataPath, key string
 
-	flag.StringVar(&operation, "op", "encrypt", "Operation to perform - encrypt|decrypt")
-	flag.StringVar(&key, "key", empty, "Security key")
-	flag.StringVar(&dataPath, "datapath", empty, "Path to file containing data")
+	flag.StringVar(&operation, "o", "encrypt", "Operations - encrypt|decrypt|keygen")
+	flag.StringVar(&key, "k", empty, "Security key")
+	flag.StringVar(&dataPath, "p", empty, "Path to file containing data")
 
 	flag.Parse()
 
@@ -50,8 +51,11 @@ func (c *CLI) Run() {
 	case decrypt:
 		log.Info("Decryption operation requested")
 		decryptionProcess(dataPath, key)
+	case keygen:
+		log.Info("Key generation operation requested")
+		keyGenerationProcess()
 	default:
-		log.Fatal("Unsupported operation requested")
+		log.Fatal("Unsupported operation requested, please use -h flag for help")
 	}
 
 }
@@ -97,4 +101,10 @@ func decryptionProcess(dataPath string, key string) {
 	files.WriteToNewFile(decryptedFileName, plaintext)
 
 	files.RemoveFile(dataPath)
+}
+
+func keyGenerationProcess() {
+	key, err := km.CreateRandomKeyBytes(24)
+	checkErr(err)
+	log.Info("Key created (base64): ", km.ConvertToBase64Str(key))
 }
