@@ -12,7 +12,7 @@ func checkErr(err error) {
 	}
 }
 
-// LoadContentsOfFile reads the entire contents of the file 
+// LoadContentsOfFile reads the entire contents of the file
 // specified by the dataPath parameter.
 func LoadContentsOfFile(dataPath string) []byte {
 	file, err := os.Open(dataPath)
